@@ -7,8 +7,10 @@ class Base(DeclarativeBase):
 class UserDB(Base): 
     __tablename__ = "users" 
     
-    id: Mapped[int] = mapped_column(primary_key=True, index=True) 
+    user_id: Mapped[int] = mapped_column(primary_key=True, index=True) 
     name: Mapped[str] = mapped_column(String, nullable=False) 
-    email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False) 
+    email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    password: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False) 
     age: Mapped[int] = mapped_column(Integer, nullable=False) 
-    student_id: Mapped[str] = mapped_column(String, unique=True, nullable=False) 
+    user_name: Mapped[str] = mapped_column(String, unique=True, nullable=False) 

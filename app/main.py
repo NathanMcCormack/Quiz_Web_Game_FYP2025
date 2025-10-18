@@ -23,7 +23,7 @@ def get_db():
 
 @app.get("/api/users", response_model=list[UserRead]) 
 def list_users(db: Session = Depends(get_db)): 
-    stmt = select(UserDB).order_by(UserDB.id) 
+    stmt = select(UserDB).order_by(UserDB.user_id) 
     return list(db.execute(stmt).scalars()) 
  
 @app.get("/api/users/{user_id}", response_model=UserRead) 
