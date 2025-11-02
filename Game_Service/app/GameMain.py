@@ -4,7 +4,7 @@ from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 
 from .GameDatabase import engine, SessionLocal
-from .GameModels import Base, QuestionDB, GameRunDB
+from .GameModels import Base, QuestionDB
 from .GameSchemas import (
     QuestionCreate, 
     QuestionRead,
@@ -86,7 +86,7 @@ def patch_question(question_id: int, payload: QuestionPatch, db_session: Session
 @app.delete("/api/questions/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_question(question_id: int, db: Session = Depends(get_db)):
     question = db.get(QuestionDB, question_id)
-    if not q:
+    if not question:
         raise HTTPException(status_code=404, detail="Question not found")
     db.delete(question)
     db.commit()
