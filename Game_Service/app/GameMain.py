@@ -4,13 +4,17 @@ from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 
 from .GameDatabase import engine, SessionLocal
-from .GameModels import Base, QuestionDB
+from .GameModels import Base, QuestionDB, GameRunDB
 from .GameSchemas import (
     QuestionCreate, 
     QuestionRead,
     QuestionUpdate, 
     QuestionReadPublic,
-    QuestionPatch
+    QuestionPatch,
+    UserStatsRead,
+    GameRunCreate,
+    GameRunRead,
+    LeaderboardEntry
 )
 
 app = FastAPI()
@@ -93,5 +97,46 @@ def delete_question(question_id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 #----------- Game Runs -----------------
+@app.get("/api/users/{user_id}/stats", response_model=UserStatsRead)
+def get_user_stats(user_id: int, db: Session = Depends(get_db)):
+    count_stmt = select(func.count()).select_from(GameRunDB).where(GameRunDB.user_id == user_id)
+    games_played = db.execute(count_stmt).scalar_one()
+
+    if games_played == 0:
+        return UserStatsRead(high_score=0, longest_streak=0, average_score=0.0, games_played=0)
+
+    #functions to retrieve the user high scores, later we will link these to the actual users in the other microservice
+    max_score = db.execute(select(func.max(GameRunDB.score)).where(GameRunDB.user_id == user_id)).scalar_one()
+    max_streak = db.execute(select(func.max(GameRunDB.streak)).where(GameRunDB.user_id == user_id)).scalar_one()
+    avg_score = db.execute(select(func.avg(GameRunDB.score)).where(GameRunDB.user_id == user_id)).scalar_one()
+    return UserStatsRead(high_score=max_score, longest_streak=max_streak, average_score=round(float(avg_score or 0.0), 2), games_played=games_played)
+
+#Post user run once game is ended.
+@app.post("/api/users/{user_id}/runs", response_model=GameRunRead, status_code=status.HTTP_201_CREATED)
+def add_user_run(user_id: int, payload: GameRunCreate, db: Session = Depends(get_db)):
+    run = GameRunDB(user_id=user_id, **payload.model_dump())
+    db.add(run)
+    commit_or_rollback(db, "Run creation failed")
+    db.refresh(run)
+    return run
+
+# Leaderboard
+#we are using a list because the users best scores are not stored in a db in this microservice 
+@app.get("/api/leaderboard", response_model=list[LeaderboardEntry])
+def get_leaderboard(db: Session = Depends(get_db)):
+    stmt = (
+        select(
+            GameRunDB.user_id,
+            func.max(GameRunDB.score).label("best_score"),
+            func.max(GameRunDB.streak).label("best_streak"),
+        )
+        .group_by(GameRunDB.user_id)
+        .order_by(func.max(GameRunDB.score).desc(), func.max(GameRunDB.streak).desc())
+    )
+    rows = db.execute(stmt).all()
+    return [
+        {"user_id": r.user_id, "best_score": r.best_score, "best_streak": r.best_streak}
+        for r in rows
+    ]
 
 
