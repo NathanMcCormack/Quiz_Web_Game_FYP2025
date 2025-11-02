@@ -14,6 +14,14 @@ class QuestionCreate(BaseModel):
     category: CategoryStr
     difficulty: Difficulty
 
+class QuestionRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    question: QuestionStr
+    answer: AnswerInt
+    category: CategoryStr
+    difficulty: Difficulty
+
 class QuestionReadPublic(BaseModel): #leave the snwer out of this one, as it will be used for the gameplay and we dont want the answer to be visable to the player 
     model_config = ConfigDict(from_attributes=True)
     id: int
@@ -23,7 +31,6 @@ class QuestionReadPublic(BaseModel): #leave the snwer out of this one, as it wil
 
 class QuestionUpdate(QuestionCreate): #Full updates of a question
     pass #uses same parameters from QuestionCreate
-
 
 class QuestionPatch(BaseModel): #partial updates of a question
     question: Optional[QuestionStr] = None
