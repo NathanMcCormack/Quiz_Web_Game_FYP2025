@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select 
 from sqlalchemy.exc import IntegrityError 
  
-from .database import engine, SessionLocal 
-from .models import Base, UserDB 
-from .schemas import UserCreate, UserRead 
+from .UserDatabase import engine, SessionLocal 
+from .UserModels import Base, UserDB 
+from .UserSchemas import UserCreate, UserRead 
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
