@@ -106,7 +106,7 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db)):
         return UserStatsRead(high_score=0, longest_streak=0, average_score=0.0, games_played=0)
 
     #functions to retrieve the user high scores, later we will link these to the actual users in the other microservice
-    max_score = db.execute(select(func.max(GameRunDB.score)).where(GameRunDB.user_id == user_id)).scalar_one()
+    max_score = db.execute(select(func.max(GameRunDB.score)).where(GameRunDB.user_id == user_id)).scalar_one() #.scalar_obne() just pulls a single number result 
     max_streak = db.execute(select(func.max(GameRunDB.streak)).where(GameRunDB.user_id == user_id)).scalar_one()
     avg_score = db.execute(select(func.avg(GameRunDB.score)).where(GameRunDB.user_id == user_id)).scalar_one()
     return UserStatsRead(high_score=max_score, longest_streak=max_streak, average_score=round(float(avg_score or 0.0), 2), games_played=games_played)
