@@ -1,5 +1,71 @@
+################################
+# Python / FastAPI / Backend
+################################
+
+# Byte-compiled / cache
 __pycache__/
-.ipynb_checkpoints/
-*.pyc
+*.py[cod]
+*$py.class
+
+# Virtual envs
 venv/
+.env/
+.env/
+.venv/
+env/
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing / tooling caches
+.pytest_cache/
+.mypy_cache/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# SQLite / local DB files (if you use SQLite locally)
+*.sqlite
+*.sqlite3
 *.db
+
+# Local config
+*.log
+
+################################
+# Node / React / Frontend
+################################
+
+# Dependencies
+ReactApp/node_modules/
+
+# Vite build output + cache
+ReactApp/dist/
+ReactApp/.vite/
+
+# Env files for frontend
+ReactApp/.env
+ReactApp/.env.*
+!.env.example
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+################################
+# OS / Editor junk
+################################
+
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+*.swp
+*.swo
