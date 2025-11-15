@@ -64,6 +64,14 @@ def get_random_question(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No questions available") #returns error if a question can't be found
     return QuestionReadPublic.model_validate(db_random_question) #returns the random question without the answer
 
+#Gets a specific Question which the frontend will use to validate correct answers
+@app.get("/api/questions/{question_id}", response_model=QuestionRead)
+def get_question(question_id: int, db: Session = Depends(get_db)):
+    question = db.get(QuestionDB, question_id)
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    return question
+
 @app.post("/api/questions", response_model=QuestionRead, status_code=status.HTTP_201_CREATED)
 def create_question(payload: QuestionCreate, db: Session = Depends(get_db)):
     db_question = QuestionDB(**payload.model_dump())
