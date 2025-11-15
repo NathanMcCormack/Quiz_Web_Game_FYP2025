@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
+from fastapi.middleware.cors import CORSMiddleware
 
 from .GameDatabase import engine, SessionLocal
 from .GameModels import Base, QuestionDB, GameRunDB
@@ -19,6 +20,16 @@ from .GameSchemas import (
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
