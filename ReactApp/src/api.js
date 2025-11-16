@@ -3,7 +3,7 @@ const API_BASE_URL = "/api"; //Allows to easily change the URL in the future if 
 
 export async function fetchRandomQuestion() {
   const res = await axios.get(`${API_BASE_URL}/questions/random`);  //in main -> @app.get("/api/questions/random", response_model=QuestionReadPublic)
-  return res.data; // { id, question, category, difficulty }
+  return res.data; // { id, question, category, difficulty } **doesnt show the answer**
 }
 
 export async function fetchQuestionById(id) {
