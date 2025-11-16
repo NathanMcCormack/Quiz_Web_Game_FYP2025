@@ -1,0 +1,14 @@
+body {
+  font-family: Roboto, Helvetica, sans-serif;
+  min-height: 100vh;
+  background:
+    radial-gradient(80% 15% at 100% 90%, rgba(85, 248, 139, 0.267), rgba(9, 133, 81, 0)),
+    radial-gradient(at 0 100%, rgba(62, 109, 93, 0.2), rgba(255, 255, 255, 0)),
+    radial-gradient(farthest-side at 100% 50%, #ffc5, #fff0),
+    linear-gradient(190deg, rgb(16, 104, 155) 5%, #78c3ef, rgb(95, 130, 199) 90%);
+}
+
+div{
+  text-align: center;
+  color: #000000;
+}
