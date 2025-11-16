@@ -7,8 +7,3 @@ body {
     radial-gradient(farthest-side at 100% 50%, #ffc5, #fff0),
     linear-gradient(190deg, rgb(16, 104, 155) 5%, #78c3ef, rgb(95, 130, 199) 90%);
 }
-
-div{
-  text-align: center;
-  color: #000000;
-}

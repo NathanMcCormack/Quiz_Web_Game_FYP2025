@@ -1,0 +1,20 @@
+div{
+  text-align: center;
+  color: #000000;
+}
+
+/* Main card container */
+.qp-card {
+  background: #b9c9c3;
+  padding: 2rem 2.5rem;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  opacity: 75%;
+}
+
+.page-center {
+  display: flex;             /* turn on flexbox */
+  justify-content: center;   /* center left–right */
+  align-items: auto;       /* center up–down */
+}
