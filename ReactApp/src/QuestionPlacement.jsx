@@ -1,46 +1,37 @@
-// ReactApp/src/QuestionPlacement.jsx
-
-import React, { useEffect, useState } from "react";
-import { fetchRandomQuestion, fetchQuestionById } from "./api";
+import React, { useEffect, useState } from "react"; //useState lets the component store values and update them, useEffect... 
+import { fetchRandomQuestion, fetchQuestionById } from "./api"; //importing our two functions for fetching questions 
 
 function QuestionPlacement() {
 
   // The question currently being placed
-  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(null); //setting usestate to NULL, to start off with currentQuestion
 
-  // The number line: [0, Q1, Q2, ..., ∞]
-  const [positions, setPositions] = useState([
+  // The number line, setting just 0 and infinity in here first 
+  const [positions, setPositions] = useState([//setPositions wil be used later as the positions of the cards will be changing
     { id: "zero", label: "0", type: "boundary", value: 0 },
     {id: "infinity", label: "∞", type: "boundary", value: Number.POSITIVE_INFINITY,},
   ]);
 
-  // Score for the player
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState(0);   //players score
 
-  // Feedback / error messages
-  const [message, setMessage] = useState("");
-
-  // STEP 5.2 – load the first random question (and every time we want a new one)
+  const [message, setMessage] = useState(""); //used for feedback errors
 
   async function loadNextQuestion() {
     try {
-      const q = await fetchRandomQuestion();
-      console.log("Loaded random question: ", q);
+      const q = await fetchRandomQuestion(); //call our function sto call a question from the backend
+      console.log("Loaded random question: ", q); //message to the console 
       setCurrentQuestion(q);
       setMessage("");
-    } catch (err) {
+    } catch (err) { //if it fails to get a question form the backend, the error message below will be returned
       console.error("Failed to load random question: ", err);
       setMessage("Could not load question from backend.");
     }
   }
 
-  // Run once when the component mounts
-  useEffect(() => {
-    loadNextQuestion();
-  }, []);
 
-  // For now, just render some basic info so you can see state updates.
-  // We'll replace this later with the full drag & drop UI.
+  useEffect(() => {loadNextQuestion();}, []); //this run safter the initial render of the webpage. the empty array tells it to only run once 
+
+//What will show up on the webpage - everything inside div.
   return (
     <div>
       <h1>Question Placement Testing</h1>
@@ -56,7 +47,7 @@ function QuestionPlacement() {
 
       {message && (
         <p>
-          <strong>Message:</strong> {message}
+          <strong>Message:</strong> {message} 
         </p>
       )}
 
@@ -69,5 +60,13 @@ function QuestionPlacement() {
     </div>
   );
 }
+//{currentQuestion ? currentQuestion.question : "Loading..."} if currentQuestion is not null - show the question. Otherwise disaplay "Loading..."
+
+//If the "message" is empty tgen it displays nothing, otherwise it will display the message 
+// {message && (
+//   <p>
+//     <strong>Message:</strong> {message} 
+//   </p>
+// )}
 
 export default QuestionPlacement;
