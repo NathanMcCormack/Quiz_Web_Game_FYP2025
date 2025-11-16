@@ -42,7 +42,7 @@ function QuestionPlacement() {
           <strong>Score:</strong> {score}
         </p>
 
-        <p id="p1" draggable="true">This Test is draggable.</p>
+        <p className="draggable" id="p1" draggable="true">This Test is draggable.</p>
 
         <p>
           <strong>Current question:</strong>{" "}
@@ -60,7 +60,7 @@ function QuestionPlacement() {
         </p>
         <pre>{JSON.stringify(positions, null, 2)}</pre>
 
-        <button onClick={loadNextQuestion}>Load another random question</button>
+        <button className="qp-button" onClick={loadNextQuestion}>Load another random question</button>
       </div>
     </div>
   );

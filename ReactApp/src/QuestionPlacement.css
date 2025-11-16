@@ -3,7 +3,6 @@ div{
   color: #000000;
 }
 
-/* Main card container */
 .qp-card {
   background: #b9c9c3;
   padding: 2rem 2.5rem;
@@ -14,7 +13,22 @@ div{
 }
 
 .page-center {
-  display: flex;             /* turn on flexbox */
-  justify-content: center;   /* center left–right */
-  align-items: auto;       /* center up–down */
+  display: flex;          
+  justify-content: center;   /* center left/right */
+  align-items: auto;       /* center up/down */
+}
+
+.qp-button {
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px; /*makes button rounded*/
+  border-color: #ffffff;
+  background: #258beb;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.draggable{
+    cursor: grab;
 }
