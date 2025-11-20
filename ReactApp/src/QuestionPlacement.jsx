@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"; //useState lets the component store values and update them, useEffect... 
 import { fetchRandomQuestion, fetchQuestionById } from "./api"; //importing our two functions for fetching questions 
 import "./QuestionPlacement.css";
+import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 
 function QuestionPlacement() {
 
@@ -38,16 +39,13 @@ function QuestionPlacement() {
       <div className="qp-card">
         <h1>Question Placement Testing</h1>
 
-        <p>
+        <div className="number-line">
+          <p className="current-question" draggable="true">
+            <strong>Current question:</strong>{" "}
+            {currentQuestion ? currentQuestion.question : "Loading..."}
+          </p>
           <strong>Score:</strong> {score}
-        </p>
-
-        <p className="draggable" id="p1" draggable="true">This Test is draggable.</p>
-
-        <p>
-          <strong>Current question:</strong>{" "}
-          {currentQuestion ? currentQuestion.question : "Loading..."}
-        </p>
+        </div>
 
         {message && (
           <p>
@@ -58,7 +56,10 @@ function QuestionPlacement() {
         <p>
           <strong>Positions array:</strong>
         </p>
-        <pre>{JSON.stringify(positions, null, 2)}</pre>
+        <div className="number-line">
+          <div className="number-box">0</div>
+          <div className="number-box" ><FaInfinity/></div>
+        </div>
 
         <button className="qp-button" onClick={loadNextQuestion}>Load another random question</button>
       </div>

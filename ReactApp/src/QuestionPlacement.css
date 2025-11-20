@@ -3,11 +3,15 @@ div{
   color: #000000;
 }
 
+body {
+  margin: 0;
+}
+
 .qp-card {
   background: #b9c9c3;
   padding: 2rem 2.5rem;
   border-radius: 12px;
-  max-width: 600px;
+  max-width: 1200px;
   width: 100%;
   opacity: 75%;
 }
@@ -15,7 +19,8 @@ div{
 .page-center {
   display: flex;          
   justify-content: center;   /* center left/right */
-  align-items: auto;       /* center up/down */
+  align-items: center;   
+  min-height: 100vh; /*this line places the div in the center of the page. vh - viewport height*/
 }
 
 .qp-button {
@@ -31,4 +36,48 @@ div{
 
 .draggable{
     cursor: grab;
+}
+
+.number-line {
+  display: flex;              /* put boxes in a row */
+  justify-content: center;    /* center them horizontally */
+  gap: 1.5rem;                /* space between the boxes */
+  margin: 1.5rem 0;           /* space above/below the row */
+}
+
+.questions-deck{
+  display: flex;              /* put boxes in a row */
+  justify-content: right;    /* center them horizontally */
+  gap: 1.5rem;                /* space between the boxes */
+  margin: 1.5rem 0;           /* space above/below the row */
+}
+
+.number-box {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  border: 2px solid #2563eb;  /* blue border */
+  background: #eff6ff;        /* light blue background */
+  color: #1d4ed8;             /* blue text */
+  font-size: 2rem;            /* makes 0 and infinity symbol bigger */
+  font-weight: 600;
+  display: flex;              /* center text inside the box */
+  align-items: center;        
+  justify-content: center;    
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); /* soft shadow */
+}
+
+.current-question{
+  text-align: center;
+  width: 160px;
+  height: 80px; 
+  border-radius: 10px;
+  border: 2px solid #2563eb;  /* blue border */
+  background: #eff6ff;        /* light blue background */
+  color: #1d4ed8;             /* blue text */
+  font-weight: 600;
+  display: flex;          
+  justify-content: center;   /* center left/right */
+  align-items: center;      
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); /* soft shadow */
 }
