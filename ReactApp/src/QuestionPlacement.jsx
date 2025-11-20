@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"; //useState lets the component store values and update them, useEffect... 
 import { fetchRandomQuestion, fetchQuestionById } from "./api"; //importing our two functions for fetching questions 
+import "./QuestionPlacement.css";
 
 function QuestionPlacement() {
 
@@ -33,32 +34,34 @@ function QuestionPlacement() {
 
 //What will show up on the webpage - everything inside div.
   return (
-    <div>
-      <h1>Question Placement Testing</h1>
+    <div className="page-center">
+      <div className="qp-card">
+        <h1>Question Placement Testing</h1>
 
-      <p>
-        <strong>Score:</strong> {score}
-      </p>
-
-      <p id="p1" draggable="true">This Test is draggable.</p>
-
-      <p>
-        <strong>Current question:</strong>{" "}
-        {currentQuestion ? currentQuestion.question : "Loading..."}
-      </p>
-
-      {message && (
         <p>
-          <strong>Message:</strong> {message} 
+          <strong>Score:</strong> {score}
         </p>
-      )}
 
-      <p>
-        <strong>Positions array:</strong>
-      </p>
-      <pre>{JSON.stringify(positions, null, 2)}</pre>
+        <p className="draggable" id="p1" draggable="true">This Test is draggable.</p>
 
-      <button onClick={loadNextQuestion}>Load another random question</button>
+        <p>
+          <strong>Current question:</strong>{" "}
+          {currentQuestion ? currentQuestion.question : "Loading..."}
+        </p>
+
+        {message && (
+          <p>
+            <strong>Message:</strong> {message} 
+          </p>
+        )}
+
+        <p>
+          <strong>Positions array:</strong>
+        </p>
+        <pre>{JSON.stringify(positions, null, 2)}</pre>
+
+        <button className="qp-button" onClick={loadNextQuestion}>Load another random question</button>
+      </div>
     </div>
   );
 }
