@@ -2,9 +2,19 @@ import React, { useEffect, useState } from "react"; //useState lets the componen
 import { fetchRandomQuestion, fetchQuestionById } from "./api"; //importing our two functions for fetching questions 
 import "./QuestionPlacement.css";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
+//imports from dnd website 
+import { DndContext, closestCenter } from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 
 function QuestionPlacement() {
-
   // The question currently being placed
   const [currentQuestion, setCurrentQuestion] = useState(null); //setting usestate to NULL, to start off with currentQuestion
 
@@ -62,6 +72,7 @@ function QuestionPlacement() {
         </div>
 
         <button className="qp-button" onClick={loadNextQuestion}>Load another random question</button>
+
       </div>
     </div>
   );

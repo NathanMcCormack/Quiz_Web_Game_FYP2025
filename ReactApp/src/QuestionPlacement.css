@@ -81,3 +81,13 @@ body {
   align-items: center;      
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); /* soft shadow */
 }
+
+
+.drop-zone{
+  text-align: center;
+  width: 300px;
+  height: 150px; 
+  border-radius: 10px;
+  border: 2px solid #2563eb;  /* blue border */
+  background: #eff6ff;  
+}
