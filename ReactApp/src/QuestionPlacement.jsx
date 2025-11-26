@@ -17,12 +17,14 @@ import { CSS } from "@dnd-kit/utilities";
 function QuestionPlacement() {
   // The question currently being placed
   const [currentQuestion, setCurrentQuestion] = useState(null); //setting usestate to NULL, to start off with currentQuestion
-
-const [lineQuestions, setLineQuestions] = useState([]);
-
+  const [lineQuestions, setLineQuestions] = useState([]);
   const [score, setScore] = useState(0);   //players score
-
   const [message, setMessage] = useState(""); //used for feedback errors
+
+  function handleDragEnd(dragEvent){
+    const {active, over} = dragEvent;
+    console.log("Drag ended", {active, over});
+  }
 
   async function loadNextQuestion() {
     try {
@@ -41,36 +43,38 @@ const [lineQuestions, setLineQuestions] = useState([]);
 
 //What will show up on the webpage - everything inside div.
   return (
-    <div className="page-center">
-      <div className="qp-card">
-        <h1>Question Placement Testing</h1>
+     <DndContext onDragEnd={handleDragEnd}>
+      <div className="page-center">
+        <div className="qp-card">
+          <h1>Question Placement Testing</h1>
 
-        <div className="number-line">
-          <p className="current-question" draggable="true">
-            <strong>Current question:</strong>{" "}
-            {currentQuestion ? currentQuestion.question : "Loading..."}
-          </p>
-          <strong>Score:</strong> {score}
-        </div>
+          <div className="number-line">
+            <p className="current-question" draggable="true">
+              <strong>Current question:</strong>{" "}
+              {currentQuestion ? currentQuestion.question : "Loading..."}
+            </p>
+            <strong>Score:</strong> {score}
+          </div>
 
-        {message && (
+          {message && (
+            <p>
+              <strong>Message:</strong> {message} 
+            </p>
+          )}
+
           <p>
-            <strong>Message:</strong> {message} 
+            <strong>Positions array:</strong>
           </p>
-        )}
+          <div className="number-line">
+            <div className="number-box">0</div>
+            <div className="number-box" ><FaInfinity/></div>
+          </div>
 
-        <p>
-          <strong>Positions array:</strong>
-        </p>
-        <div className="number-line">
-          <div className="number-box">0</div>
-          <div className="number-box" ><FaInfinity/></div>
+          <button className="qp-button" onClick={loadNextQuestion}>Load another random question</button>
+
         </div>
-
-        <button className="qp-button" onClick={loadNextQuestion}>Load another random question</button>
-
       </div>
-    </div>
+    </DndContext>
   );
 }
 //{currentQuestion ? currentQuestion.question : "Loading..."} if currentQuestion is not null - show the question. Otherwise disaplay "Loading..."
