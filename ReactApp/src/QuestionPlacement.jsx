@@ -18,11 +18,7 @@ function QuestionPlacement() {
   // The question currently being placed
   const [currentQuestion, setCurrentQuestion] = useState(null); //setting usestate to NULL, to start off with currentQuestion
 
-  // The number line, setting just 0 and infinity in here first 
-  const [positions, setPositions] = useState([//setPositions wil be used later as the positions of the cards will be changing
-    { id: "zero", label: "0", type: "boundary", value: 0 },
-    {id: "infinity", label: "∞", type: "boundary", value: Number.POSITIVE_INFINITY,},
-  ]);
+const [lineQuestions, setLineQuestions] = useState([]);
 
   const [score, setScore] = useState(0);   //players score
 
