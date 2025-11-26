@@ -26,6 +26,20 @@ function QuestionPlacement() {
     console.log("Drag ended", {active, over});
   }
 
+  function CurrentQuestionCard({question}){
+    return (
+    <div className="current-question">
+      <strong>Current question:</strong>
+      <div className="current-question-text">
+        {question ? question.question : "Loading..."}
+      </div>
+      <p className="current-question-hint">
+        Drag this card between 0 and ∞ 
+      </p>
+    </div>
+    )
+  }
+
   async function loadNextQuestion() {
     try {
       const q = await fetchRandomQuestion(); //call our function sto call a question from the backend
@@ -49,10 +63,7 @@ function QuestionPlacement() {
           <h1>Question Placement Testing</h1>
 
           <div className="number-line">
-            <p className="current-question" draggable="true">
-              <strong>Current question:</strong>{" "}
-              {currentQuestion ? currentQuestion.question : "Loading..."}
-            </p>
+            <CurrentQuestionCard question={currentQuestion} />
             <strong>Score:</strong> {score}
           </div>
 
