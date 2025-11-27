@@ -3,7 +3,7 @@ import { fetchRandomQuestion, fetchQuestionById } from "./api"; //importing our 
 import "./QuestionPlacement.css";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 //imports from dnd website 
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import { DndContext, closestCenter, useDraggable } from "@dnd-kit/core";
 
 import {
   SortableContext,
@@ -27,17 +27,29 @@ function QuestionPlacement() {
   }
 
   function CurrentQuestionCard({question}){
-    return (
-    <div className="current-question">
+    const { attributes, listeners, setNodeRef, transform, isDragging } =
+      useDraggable({
+        id: "current-card",
+        disabled: !question, // dont drag when no question
+    });
+
+    const style = {
+      transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+      opacity: isDragging ? 0.8 : 1, //if dragging opacacity becomes .8 to be more obvious that user is dragging card
+      cursor: question ? "grab" : "grabbing", //if the cursor is over the question, it will have a grab icon 
+    };
+
+  return (
+    <div ref={setNodeRef} style={style} className="current-question" {...attributes} {...(question ? listeners : {})}>
       <strong>Current question:</strong>
       <div className="current-question-text">
         {question ? question.question : "Loading..."}
       </div>
       <p className="current-question-hint">
-        Drag this card between 0 and ∞ 
+        Drag this card and drop it between 0 and ∞
       </p>
     </div>
-    )
+  );
   }
 
   async function loadNextQuestion() {
