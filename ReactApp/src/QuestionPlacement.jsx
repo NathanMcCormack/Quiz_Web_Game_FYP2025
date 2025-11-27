@@ -3,7 +3,7 @@ import { fetchRandomQuestion, fetchQuestionById } from "./api"; //importing our 
 import "./QuestionPlacement.css";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 //imports from dnd website 
-import { DndContext, closestCenter, useDraggable } from "@dnd-kit/core";
+import { DndContext, closestCenter, useDraggable, useDroppable } from "@dnd-kit/core";
 
 import {
   SortableContext,
@@ -51,6 +51,14 @@ function QuestionPlacement() {
     </div>
   );
   }
+
+ function DroppableSlot({slotIndex}){
+    const { setNodeRef, isOver } = useDroppable({ id: `slot-${slotIndex}`});
+
+    return (
+      <div ref={setNodeRef} className={`drop-slot ${isOver ? "drop-slot--active" : ""}`}/>
+    );
+  } 
 
   async function loadNextQuestion() {
     try {
