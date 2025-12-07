@@ -100,3 +100,53 @@ body {
   font-size: 0.85rem;
   color: #4b5563;
 }
+
+/* Number line container */
+.number-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* 0, ∞ and placed question boxes */
+.number-box {
+  min-width: 90px;
+  min-height: 70px;
+  padding: 0.5rem;
+  border-radius: 10px;
+  border: 2px solid #2563eb;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+}
+
+/* placed question boxes */
+.line-question-box {
+  background: #e0f2fe;
+}
+
+/* boundaries */
+.boundary-box {
+  background: #f1f5f9;
+  font-weight: 700;
+}
+
+/* droppable slots between boxes */
+.drop-slot {
+  width: 24px;
+  height: 50px;
+  border-radius: 12px;
+  border: 2px dashed transparent;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.drop-slot--active {
+  border-color: #22c55e;
+  background-color: rgba(34, 197, 94, 0.1);
+}
