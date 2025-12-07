@@ -5,14 +5,6 @@ import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons 
 //imports from dnd website 
 import { DndContext, closestCenter, useDraggable, useDroppable } from "@dnd-kit/core";
 
-import {
-  SortableContext,
-  useSortable,
-  arrayMove,
-  horizontalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-
 
 function QuestionPlacement() {
   // The question currently being placed
@@ -21,9 +13,59 @@ function QuestionPlacement() {
   const [score, setScore] = useState(0);   //players score
   const [message, setMessage] = useState(""); //used for feedback errors
 
-  function handleDragEnd(dragEvent){
-    const {active, over} = dragEvent;
-    console.log("Drag ended", {active, over});
+  function handleDragEnd(dragEvent) {
+    const { active, over } = dragEvent;
+
+    // If we didn't drop over anything, do nothing
+    if (!over) {
+      return;
+    }
+
+    // We only care about the current question card
+    if (active.id !== "current-card") {
+      return;
+    }
+
+    // If for some reason there's no question loaded, bail
+    if (!currentQuestion) {
+      return;
+    }
+
+    // over.id will look like "slot-0", "slot-1", ...
+    const slotId = over.id;
+    if (!slotId.startsWith("slot-")) {
+      return;
+    }
+
+    const indexString = slotId.replace("slot-", "");
+    const insertIndex = parseInt(indexString, 10);
+    if (Number.isNaN(insertIndex)) {
+      return;
+    }
+
+    // Build a new "fixed" card for the line
+    const newCard = {
+      id: `line-${currentQuestion.id ?? Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}`,
+      question: currentQuestion,
+    };
+
+    // Insert this card into lineQuestions at the chosen position
+    setLineQuestions((prev) => {
+      const next = [...prev];
+      next.splice(insertIndex, 0, newCard);
+      return next;
+    });
+
+    // Increase score by 1
+    setScore((prevScore) => prevScore + 1);
+
+    // Clear current card so it can't be dragged again
+    setCurrentQuestion(null);
+
+    // Load the next question from the backend
+    loadNextQuestion();
   }
 
   function CurrentQuestionCard({question}){
@@ -36,7 +78,7 @@ function QuestionPlacement() {
     const style = {
       transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
       opacity: isDragging ? 0.8 : 1, //if dragging opacacity becomes .8 to be more obvious that user is dragging card
-      cursor: question ? "grab" : "grabbing", //if the cursor is over the question, it will have a grab icon 
+      cursor: question ? "grab" : "default", //if the cursor is over the question, it will have a grab icon 
     };
 
   return (
@@ -59,6 +101,24 @@ function QuestionPlacement() {
       <div ref={setNodeRef} className={`drop-slot ${isOver ? "drop-slot--active" : ""}`}/>
     );
   } 
+
+ function LineQuestions({lineQuestions}){
+  return (
+    <>
+      {lineQuestions.map((item, index) => (
+        <React.Fragment key={item.id}>
+          <DroppableSlot slotIndex={index} />
+          <div className="number-box line-question-box">
+            {item.question?.question ?? "Question"}
+          </div>
+        </React.Fragment>
+      ))}
+
+      {/* Final slot after the last question */}
+      <DroppableSlot slotIndex={lineQuestions.length} />
+    </>
+  );
+} 
 
   async function loadNextQuestion() {
     try {
@@ -96,10 +156,14 @@ function QuestionPlacement() {
           <p>
             <strong>Positions array:</strong>
           </p>
-          <div className="number-line">
-            <div className="number-box">0</div>
-            <div className="number-box" ><FaInfinity/></div>
+          <div className="number-line"> 
+          <div className="number-box boundary-box">0</div>
+          <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
+          <DroppableSlot slotIndex={lineQuestions.length} />  {/* Final slot after the last question */}
+          <div className="number-box boundary-box">   {/* Right boundary: ∞ */}
+            <FaInfinity />
           </div>
+        </div>
 
           <button className="qp-button" onClick={loadNextQuestion}>Load another random question</button>
 
