@@ -1,4 +1,3 @@
-# Minimal Makefile with start/stop 
 UserAPP = User_Service.app.UserMain:app 
 GameAPP = Game_Service.app.GameMain:app
 PID_FILE = .uvicorn.pid 

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, Integer, DateTime, func
 
+#SQLAlchemy - parent class that all db models inherit from, knows to add tables to db. pass just defines the class (no code needed)
 class Base(DeclarativeBase):
     pass
 

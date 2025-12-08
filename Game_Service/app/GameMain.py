@@ -18,7 +18,9 @@ from .GameSchemas import (
     LeaderboardEntry
 )
 
+#creates a fastapi object called app - what we you for endpoints. @app.get/post/put/patch/delete. Also used for running the server - uvicorn main:app
 app = FastAPI()
+#looks at all tables made from Base and rceates them
 Base.metadata.create_all(bind=engine)
 
 origins = ["*"]
@@ -31,6 +33,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#function for reusability - opens request, waits until the route is finished, finally closes  the session (whether it finshed successfully or raised error)
 def get_db():
     db = SessionLocal()
     try:
@@ -38,6 +41,7 @@ def get_db():
     finally:
         db.close()
 
+#commits changes to db, if error - undoes changes
 def commit_or_rollback(db: Session, error_msg: str):
     try:
         db.commit()
@@ -59,7 +63,7 @@ def list_questions(db: Session = Depends(get_db)):
 @app.get("/api/questions/random", response_model=QuestionReadPublic)
 def get_random_question(db: Session = Depends(get_db)):
     stmt = select(QuestionDB).order_by(func.random()).limit(1) #uses a function to get one random question from the QestionDB table 
-    db_random_question = db.execute(stmt).scalars().first()
+    db_random_question = db.execute(stmt).scalars().first() #.execute - runs query, .scalars - returns values in the rows, .first - first row is returned. **this is only used fr get randm
     if not db_random_question:
         raise HTTPException(status_code=404, detail="No questions available") #returns error if a question can't be found
     return QuestionReadPublic.model_validate(db_random_question) #returns the random question without the answer
@@ -74,14 +78,14 @@ def get_question(question_id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/questions", response_model=QuestionRead, status_code=status.HTTP_201_CREATED)
 def create_question(payload: QuestionCreate, db: Session = Depends(get_db)):
-    db_question = QuestionDB(**payload.model_dump())
+    db_question = QuestionDB(**payload.model_dump()) #'**payload' creates the body sent by the user filling the field sexactly by the payload, .model_dump - turns object into reualr python dictionary
     db.add(db_question)
     commit_or_rollback(db, "Question creation failed")
     db.refresh(db_question)
     return db_question
 
 @app.put("/api/questions/{question_id}", response_model=QuestionRead)
-def update_question(question_id: int, payload: QuestionUpdate, db: Session = Depends(get_db)):
+def update_question(question_id: int, payload: QuestionUpdate, db: Session = Depends(get_db)): #payload - the data sent by he client
     question = db.get(QuestionDB, question_id)
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
@@ -152,10 +156,10 @@ def get_leaderboard(db: Session = Depends(get_db)):
         .group_by(GameRunDB.user_id)
         .order_by(func.max(GameRunDB.score).desc(), func.max(GameRunDB.streak).desc())
     )
-    rows = db.execute(stmt).all()
+    rows = db.execute(stmt).all() #sends the above statement to the db 
     return [
         {"user_id": r.user_id, "best_score": r.best_score, "best_streak": r.best_streak}
-        for r in rows
+        for r in rows #returns multiple users with thei rallocated stats
     ]
 
 
