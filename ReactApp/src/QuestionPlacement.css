@@ -9,7 +9,7 @@ body {
 
 .qp-card {
   background: #b9c9c3;
-  padding: 2rem 2.5rem;
+  padding: 2rem 2.5rem; /* rem is from the root HTML size, so using rem instead of px for fonts, margins and padding keep it consistent*/
   border-radius: 12px;
   max-width: 1200px;
   width: 100%;
@@ -18,9 +18,9 @@ body {
 
 .page-center {
   display: flex;          
-  justify-content: center;   /* center left/right */
+  justify-content: center;  /* center left/right */
   align-items: center;   
-  min-height: 100vh; /*this line places the div in the center of the page. vh - viewport height*/
+  min-height: 100vh; /*this line places the div in the center of the page. vh - viewport height, 100vh - element will be as tall as the screen*/
 }
 
 .qp-button {
@@ -29,7 +29,7 @@ body {
   border-color: #ffffff;
   background: #258beb;
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 600; /*makes font thicker */
   font-size: 0.95rem;
   cursor: pointer;
 }
@@ -39,32 +39,32 @@ body {
 }
 
 .number-line {
-  display: flex;              /* put boxes in a row */
-  justify-content: center;    /* center them horizontally */
-  gap: 1.5rem;                /* space between the boxes */
-  margin: 1.5rem 0;           /* space above/below the row */
+  display: flex; /* put boxes in a row */
+  justify-content: center; /* center them horizontally */
+  gap: 1.5rem; /* space between the boxes */
+  margin: 1.5rem 0; /* space above/below the row */
 }
 
 .questions-deck{
-  display: flex;              /* put boxes in a row */
-  justify-content: right;    /* center them horizontally */
-  gap: 1.5rem;                /* space between the boxes */
-  margin: 1.5rem 0;           /* space above/below the row */
+  display: flex; /* put boxes in a row */
+  justify-content: right; /* center them horizontally */
+  gap: 1.5rem; /* space between the boxes */
+  margin: 1.5rem 0; /* space above/below the row */
 }
 
 .number-box {
   width: 80px;
   height: 80px;
   border-radius: 10px;
-  border: 2px solid #2563eb;  /* blue border */
-  background: #eff6ff;        /* light blue background */
-  color: #1d4ed8;             /* blue text */
-  font-size: 2rem;            /* makes 0 and infinity symbol bigger */
+  border: 2px solid #2563eb;  
+  background: #eff6ff;        
+  color: #1d4ed8;            
+  font-size: 2rem; /* makes 0 and infinity symbol bigger */
   font-weight: 600;
-  display: flex;              /* center text inside the box */
+  display: flex; /* center text inside the box */
   align-items: center;        
   justify-content: center;    
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); /* soft shadow */
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); 
 }
 
 .current-question{
@@ -73,9 +73,9 @@ body {
   max-width: 500px;
   text-align: left;
   border-radius: 12px;
-  border: 2px solid #2563eb;  /* blue border */
-  background: #eff6ff;        /* light blue background */
-  color: #1d4ed8;             /* blue text */
+  border: 2px solid #2563eb;  
+  background: #eff6ff;        
+  color: #1d4ed8;             
   font-weight: 600;     
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); /* soft shadow */
 }
@@ -86,7 +86,7 @@ body {
   width: 300px;
   height: 150px; 
   border-radius: 10px;
-  border: 2px solid #2563eb;  /* blue border */
+  border: 2px solid #2563eb; 
   background: #eff6ff;  
 }
 
@@ -110,7 +110,7 @@ body {
   margin-top: 1rem;
 }
 
-/* 0, ∞ and placed question boxes */
+/* 0, ininity and placed question boxes */
 .number-box {
   min-width: 90px;
   min-height: 70px;
@@ -146,7 +146,8 @@ body {
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.drop-slot--active {
+/* when a droppable slot is being hovered over by a card*/
+.drop-slot--active { 
   border-color: #22c55e;
   background-color: rgba(34, 197, 94, 0.1);
 }

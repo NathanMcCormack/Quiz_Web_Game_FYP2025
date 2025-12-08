@@ -13,43 +13,37 @@ function QuestionPlacement() {
   const [score, setScore] = useState(0);   //players score
   const [message, setMessage] = useState(""); //used for feedback errors
 
+  //function for handling an object being dragged
   function handleDragEnd(dragEvent) {
     const { active, over } = dragEvent;
-
-    // If we didn't drop over anything, do nothing
-    if (!over) {
+    //if the question card is not over a drop zone, dont do anything
+    if(!over){
       return;
     }
-
-    // We only care about the current question card
-    if (active.id !== "current-card") {
+    //if something is being dragged that isnt the current question card, do nothing
+    if(active.id !== "current-card"){
       return;
     }
-
-    // If for some reason there's no question loaded, bail
-    if (!currentQuestion) {
+    //if theres a bug and no question loads, do nothing
+    if(!currentQuestion){
       return;
     }
-
-    // over.id will look like "slot-0", "slot-1", ...
+    //the "over id" is the slots id that a card can be dragged into
     const slotId = over.id;
-    if (!slotId.startsWith("slot-")) {
+    if(!slotId.startsWith("slot-")){
       return;
     }
 
-    const indexString = slotId.replace("slot-", "");
-    const insertIndex = parseInt(indexString, 10);
-    if (Number.isNaN(insertIndex)) {
+    const indexString = slotId.replace("slot-", ""); //the slots are labled slot-X, so we're just removing the "slot-", so the indexString contains numbers only
+    const insertIndex = parseInt(indexString, 10); //using number base 10 (decimal, 0-9) as apposed to other forms lik ebinary or hex
+
+    if(Number.isNaN(insertIndex)){ //checks that the slot number inserted into the indexString was actually a number - for debugging
       return;
     }
 
-    // Build a new "fixed" card for the line
-    const newCard = {
-      id: `line-${currentQuestion.id ?? Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2)}`,
-      question: currentQuestion,
-    };
+    /* Creating new question card with id and question, id will look like "card-xx", it either picks the current question card ID or assign a random number based off current time*/
+    //?? mean sthat whater is on the right side will be used if th eleft side is null or undefined
+    const newCard = {id: `card-${currentQuestion.id ?? Date.now()}`,question: currentQuestion};
 
     // Insert this card into lineQuestions at the chosen position
     setLineQuestions((prev) => {
@@ -58,14 +52,9 @@ function QuestionPlacement() {
       return next;
     });
 
-    // Increase score by 1
-    setScore((prevScore) => prevScore + 1);
-
-    // Clear current card so it can't be dragged again
-    setCurrentQuestion(null);
-
-    // Load the next question from the backend
-    loadNextQuestion();
+    setScore((prevScore) => prevScore + 1); //increase score by 1
+    setCurrentQuestion(null); //clear current card so it can't be dragged again
+    loadNextQuestion(); //load the next question from the backend
   }
 
   function CurrentQuestionCard({question}){
@@ -160,7 +149,7 @@ function QuestionPlacement() {
           <div className="number-box boundary-box">0</div>
           <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
           <DroppableSlot slotIndex={lineQuestions.length} />  {/* Final slot after the last question */}
-          <div className="number-box boundary-box">   {/* Right boundary: ∞ */}
+          <div className="number-box boundary-box">   {/* Right boundary: infinity*/}
             <FaInfinity />
           </div>
         </div>
@@ -172,13 +161,5 @@ function QuestionPlacement() {
     </DndContext>
   );
 }
-//{currentQuestion ? currentQuestion.question : "Loading..."} if currentQuestion is not null - show the question. Otherwise disaplay "Loading..."
-
-//If the "message" is empty tgen it displays nothing, otherwise it will display the message 
-// {message && (
-//   <p>
-//     <strong>Message:</strong> {message} 
-//   </p>
-// )}
 
 export default QuestionPlacement;
