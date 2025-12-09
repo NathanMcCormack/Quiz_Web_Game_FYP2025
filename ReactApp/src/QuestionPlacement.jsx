@@ -42,13 +42,13 @@ function QuestionPlacement() {
     }
 
     /* Creating new question card with id and question, id will look like "card-xx", it either picks the current question card ID or assign a random number based off current time*/
-    //?? mean sthat whater is on the right side will be used if th eleft side is null or undefined
+    //?? mean sthat whatever is on the right side will be used if th eleft side is null or undefined
     const newCard = {id: `card-${currentQuestion.id ?? Date.now()}`,question: currentQuestion};
 
     // Insert this card into lineQuestions at the chosen position
-    setLineQuestions((prev) => {
-      const next = [...prev];
-      next.splice(insertIndex, 0, newCard);
+    setLineQuestions((prev) => { //latest state will be returned as "prev"
+      const next = [...prev]; //spread operator to copy whole array, use this to avoid mutating a state directly *******
+      next.splice(insertIndex, 0, newCard); //splice syntax: array.splice(whereToInsert, deleteCount, itemToInsert)
       return next;
     });
 
@@ -58,21 +58,22 @@ function QuestionPlacement() {
   }
 
   function CurrentQuestionCard({question}){
-    const { attributes, listeners, setNodeRef, transform, isDragging } =
+    //attributes - , listneers - event handlers (cursor change...), setNodeRef - pass this to the element uou want to be draggable (DnD Kit), transform - how far its being dragged, isDragging - Boolean (useful fo rCSS)
+    const { attributes, listeners, setNodeRef, transform, isDragging } = 
       useDraggable({
-        id: "current-card",
+        id: "current-card", //unique id for draggable card 
         disabled: !question, // dont drag when no question
     });
 
     const style = {
-      transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+      transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined, //if transform exists (how far the item has been dragged), move the element by Xpx & Ypx
       opacity: isDragging ? 0.8 : 1, //if dragging opacacity becomes .8 to be more obvious that user is dragging card
       cursor: question ? "grab" : "default", //if the cursor is over the question, it will have a grab icon 
     };
 
   return (
-    <div ref={setNodeRef} style={style} className="current-question" {...attributes} {...(question ? listeners : {})}>
-      <strong>Current question:</strong>
+    <div ref={setNodeRef} style={style} className="current-question" {...attributes} {...(question ? listeners : {})}> {/* attributes - nice to have for accessibility features for DnD kit */}
+      <strong>Current question:</strong>                                             {/* if a question exists it becomes listeners (event handlers are attached), if not - nothing */}
       <div className="current-question-text">
         {question ? question.question : "Loading..."}
       </div>
@@ -82,33 +83,36 @@ function QuestionPlacement() {
     </div>
   );
   }
-
+//Drop Zone
  function DroppableSlot({slotIndex}){
-    const { setNodeRef, isOver } = useDroppable({ id: `slot-${slotIndex}`});
+  //isOver - when a draggable item is over the drop zone
+    const { setNodeRef, isOver } = useDroppable({ id: `slot-${slotIndex}`}); //useDroppable - from DnD kit, turns component into a drop zone. id = "slot-xxx"
 
+    //This div creates the drop zone
     return (
       <div ref={setNodeRef} className={`drop-slot ${isOver ? "drop-slot--active" : ""}`}/>
     );
   } 
 
- function LineQuestions({lineQuestions}){
-  return (
-    <>
-      {lineQuestions.map((item, index) => (
-        <React.Fragment key={item.id}>
-          <DroppableSlot slotIndex={index} />
-          <div className="number-box line-question-box">
-            {item.question?.question ?? "Question"}
-          </div>
-        </React.Fragment>
-      ))}
+  function LineQuestions({lineQuestions}){ //takes in the cards that are already placed on the number line 
+    return (
+      <>
+        {lineQuestions.map((item, index) => ( //goes through each question already on the line; item (id, question), index(position in the array)
+          <React.Fragment key={item.id}> {/* key required to track which card is which */}
+            <DroppableSlot slotIndex={index} /> {/* renders teh droppable slot before the question, slotIndex decideds where to put it in the array */}
+            <div className="number-box line-question-box">
+              {item.question?.question ?? "Question"} {/* if question exists - show it, if not just show  the word "Question" to avoid crashes*/}
+            </div>
+          </React.Fragment>
+        ))}
 
-      {/* Final slot after the last question */}
-      <DroppableSlot slotIndex={lineQuestions.length} />
-    </>
-  );
-} 
+        {/* Final slot after the last question */}
+        <DroppableSlot slotIndex={lineQuestions.length} />
+      </>
+    );
+  } 
 
+  //grabs new question from backend - async so we can use await for API calls
   async function loadNextQuestion() {
     try {
       const q = await fetchRandomQuestion(); //call our function sto call a question from the backend
