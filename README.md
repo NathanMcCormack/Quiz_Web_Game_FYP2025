@@ -1,7 +1,7 @@
 # Quiz Web Game – FYP 2025
 
 Final Year Project – Software & Electronic Engineering  
-Interactive web-based quiz game where players drag and drop question cards onto a number line, placing answers in the correct order and tracking their score and streak over multiple game runs.
+Interactive web-based quiz game where players drag and drop question cards onto a number line, placing answers in the correct order and tracking their score.
 
 ---
 
@@ -43,12 +43,11 @@ Core goals:
 - Each question has:
   - A text prompt.
   - A non-negative integer answer.
-  - Category and difficulty metadata.
 - Current question is shown on a draggable card above the number line.
 - When dropped on the line:
   - The card is “locked” in place.
   - A new random question is loaded from the backend.
-  - The player’s score and streak are updated.
+  - The player’s score is updated.
 - Game runs and basic stats stored in the backend, with support for:
   - User-specific stats (high score, average score, games played).
   - Leaderboard entries.
@@ -132,47 +131,3 @@ All commands below assume you are in the project root:
 
 ```bash
 Quiz_Web_Game_FYP2025-main/
-
-###
-
-<div align="left">
-  <img src="https://raw.githubusercontent.com/maurodesouza/profile-readme-generator/master/src/assets/icons/social/linkedin/default.svg" width="52" height="40" alt="linkedin logo"  />
-</div>
-
-###
-
-<div align="left">
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" height="40" alt="javascript logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/codepen/codepen-original.svg" height="40" alt="codepen logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" height="40" alt="css logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" height="40" alt="docker logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg" height="40" alt="fastapi logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" height="40" alt="github logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" height="40" alt="html5 logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jira/jira-original.svg" height="40" alt="jira logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg" height="40" alt="nodejs logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" height="40" alt="python logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" height="40" alt="react logo"  />
-  <img width="12" />
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" height="40" alt="vscode logo"  />
-</div>
-
-###
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/NathanMcCormack/NathanMcCormack/output/pacman-contribution-graph-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/NathanMcCormack/NathanMcCormack/output/pacman-contribution-graph.svg">
-  <img alt="pacman contribution graph" src="https://raw.githubusercontent.com/NathanMcCormack/NathanMcCormack/output/pacman-contribution-graph.svg">
-</picture>
-
-###
