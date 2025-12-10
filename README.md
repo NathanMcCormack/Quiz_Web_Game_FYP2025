@@ -11,17 +11,6 @@ Interactive web-based quiz game where players drag and drop question cards onto 
 - [Features](#features)
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
-- [Getting Started](#getting-started)
-  - [Backend (FastAPI services)](#backend-fastapi-services)
-  - [Frontend (React + Vite)](#frontend-react--vite)
-- [Configuration](#configuration)
-- [Project Structure](#project-structure)
-- [API Summary](#api-summary)
-  - [Game Service](#game-service)
-  - [User Service](#user-service)
-- [Testing](#testing)
-- [Development Notes & Next Steps](#development-notes--next-steps)
-
 ---
 
 ## Overview
@@ -118,16 +107,3 @@ The system is composed of three main parts:
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js (LTS version recommended, e.g. 18+)
-- npm (comes with Node)
-- Git (if cloning from a repository)
-
-All commands below assume you are in the project root:
-
-```bash
-Quiz_Web_Game_FYP2025-main/
