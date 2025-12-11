@@ -1,3 +1,6 @@
+//Axio sends HTTP reuqests to a server (FastAPI/uvicorn) and receives data back from it 
+//axios client side -> client sends requests 
+//uvicorn server side -> waits and handles incoming requests
 import axios from "axios";
 const API_BASE_URL = "/api"; //Allows to easily change the URL in the future if needed
 

@@ -13,7 +13,7 @@ function QuestionPlacement() {
   const [score, setScore] = useState(0);   //players score
   const [message, setMessage] = useState(""); //used for feedback errors
 
-  //function for handling an object being dragged
+  //*********************   function for handling an object being dragged   *********************
   function handleDragEnd(dragEvent) {
     const { active, over } = dragEvent;
     //if the question card is not over a drop zone, dont do anything
@@ -57,6 +57,7 @@ function QuestionPlacement() {
     loadNextQuestion(); //load the next question from the backend
   }
 
+  //********************* The current card - draggable, style *********************
   function CurrentQuestionCard({question}){
     //attributes - , listneers - event handlers (cursor change...), setNodeRef - pass this to the element uou want to be draggable (DnD Kit), transform - how far its being dragged, isDragging - Boolean (useful fo rCSS)
     const { attributes, listeners, setNodeRef, transform, isDragging } = 
@@ -83,7 +84,8 @@ function QuestionPlacement() {
     </div>
   );
   }
-//Drop Zone
+
+//*********************  Drop Zone   *********************
  function DroppableSlot({slotIndex}){
   //isOver - when a draggable item is over the drop zone
     const { setNodeRef, isOver } = useDroppable({ id: `slot-${slotIndex}`}); //useDroppable - from DnD kit, turns component into a drop zone. id = "slot-xxx"
@@ -94,6 +96,7 @@ function QuestionPlacement() {
     );
   } 
 
+  //********************* Shows questions in the line *********************
   function LineQuestions({lineQuestions}){ //takes in the cards that are already placed on the number line 
     return (
       <>
@@ -112,10 +115,10 @@ function QuestionPlacement() {
     );
   } 
 
-  //grabs new question from backend - async so we can use await for API calls
+  //******************* fetchRandomQuestion - grabs new question from backend - async so we can use await for API calls ******************8
   async function loadNextQuestion() {
     try {
-      const q = await fetchRandomQuestion(); //call our function sto call a question from the backend
+      const q = await fetchRandomQuestion(); //call our function sto call a random question from the backend
       console.log("Loaded random question: ", q); //message to the console 
       setCurrentQuestion(q);
       setMessage("");
