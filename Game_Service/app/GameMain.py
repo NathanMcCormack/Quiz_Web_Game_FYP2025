@@ -15,7 +15,9 @@ from .GameSchemas import (
     UserStatsRead,
     GameRunCreate,
     GameRunRead,
-    LeaderboardEntry
+    LeaderboardEntry,
+    ValidatePlacementRequest,
+    ValidatePlacementResponse,
 )
 
 #creates a fastapi object called app - what we you for endpoints. @app.get/post/put/patch/delete. Also used for running the server - uvicorn main:app
@@ -77,7 +79,7 @@ def get_question(question_id: int, db: Session = Depends(get_db)):
     return question
 
 @app.post("/api/questions", response_model=QuestionRead, status_code=status.HTTP_201_CREATED)
-def create_question(payload: QuestionCreate, db: Session = Depends(get_db)):
+def create_question(payload: QuestionCreate, db: Session=Depends(get_db)):
     db_question = QuestionDB(**payload.model_dump()) #'**payload' creates the body sent by the user filling the field sexactly by the payload, .model_dump - turns object into reualr python dictionary
     db.add(db_question)
     commit_or_rollback(db, "Question creation failed")
@@ -111,13 +113,56 @@ def patch_question(question_id: int, payload: QuestionPatch, db_session: Session
     return question
 
 @app.delete("/api/questions/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_question(question_id: int, db: Session = Depends(get_db)):
+def delete_question(question_id: int, db: Session=Depends(get_db)):
     question = db.get(QuestionDB, question_id)
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
     db.delete(question)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+#----------- Gameplay Validation -----------
+#This get
+@app.post("/api/game/validate-placement", response_model=ValidatePlacementResponse)
+def validate_placement(payload: ValidatePlacementRequest, db: Session=Depends(get_db)):
+    placed = db.get(QuestionDB, payload.placed_question_id)
+    if not placed:
+        raise HTTPException(status_code=404, detail="Placed question not found")
+    left=None
+    right=None
+    if payload.left_neighbor_id is not None:
+        left=db.get(QuestionDB, payload.left_neighbor_id)
+        if not left:
+            raise HTTPException(status_code=404, detail="Left neighbor question not found")
+
+    if payload.right_neighbor_id is not None:
+        right = db.get(QuestionDB, payload.right_neighbor_id)
+        if not right:
+            raise HTTPException(status_code=404, detail="Right neighbor question not found")
+
+    placed_answer = placed.answer
+    left_answer = left.answer if left else None
+    right_answer = right.answer if right else None
+
+    #Allows ansers to be equal
+    if left is None and right is None:
+        correct = True
+    elif left is None:
+        #error handling for if on right card exists
+        correct = placed_answer <= right_answer  # right_answer is not None here
+    elif right is None:
+        #"" for if only left card exsts 
+        correct = left_answer <= placed_answer   # left_answer is not None here
+    else:
+        #card on both keft and right
+        correct = left_answer <= placed_answer <= right_answer
+
+    return ValidatePlacementResponse(
+        correct=correct,
+        placed_answer=placed_answer,
+        left_answer=left_answer,
+        right_answer=right_answer,
+    )
 
 #----------- Game Runs -----------------
 @app.get("/api/users/{user_id}/stats", response_model=UserStatsRead)

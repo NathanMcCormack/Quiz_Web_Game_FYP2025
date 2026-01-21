@@ -43,7 +43,7 @@ function QuestionPlacement() {
 
     /* Creating new question card with id and question, id will look like "card-xx", it either picks the current question card ID or assign a random number based off current time*/
     //?? mean sthat whatever is on the right side will be used if th eleft side is null or undefined
-    const newCard = {id: `card-${currentQuestion.id ?? Date.now()}`,question: currentQuestion};
+    const newCard = {id: `card-${currentQuestion.id ?? Date.now()}`,questionId: currentQuestion.id, question: currentQuestion};
 
     // Insert this card into lineQuestions at the chosen position
     setLineQuestions((prev) => { //latest state will be returned as "prev"

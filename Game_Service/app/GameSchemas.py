@@ -60,3 +60,15 @@ class LeaderboardEntry(BaseModel):
     user_id: int
     best_score: AnswerInt
     best_streak: AnswerInt
+
+#--------------- Game Validation -------------- 
+class ValidatePlacementRequest(BaseModel):
+    placed_question_id: int
+    left_neighbor_id: Optional[int] = None
+    right_neighbor_id: Optional[int] = None
+
+class ValidatePlacementResponse(BaseModel):
+    correct: bool
+    placed_answer: AnswerInt
+    left_answer: Optional[AnswerInt] = None
+    right_answer: Optional[AnswerInt] = None
