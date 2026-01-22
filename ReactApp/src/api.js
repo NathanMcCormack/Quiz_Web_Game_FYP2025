@@ -13,3 +13,21 @@ export async function fetchQuestionById(id) {
   const res = await axios.get(`${API_BASE_URL}/questions/${id}`);
   return res.data; // { id, question, answer, ... }
 }
+
+export async function validatePlacement({ placedQuestionId, leftNeighborId, rightNeighborId }) {
+  const res = await fetch("/api/game/validate-placement", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      placed_question_id: placedQuestionId,
+      left_neighbor_id: leftNeighborId ?? null,
+      right_neighbor_id: rightNeighborId ?? null,
+    }),
+  });
+  
+  if (!res.ok) {
+  const text = await res.text();
+  throw new Error(`validatePlacement failed: ${res.status} ${text}`);
+  }
+  return res.json();
+}

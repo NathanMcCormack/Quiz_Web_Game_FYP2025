@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"; //useState lets the component store values and update them, useEffect... 
-import { fetchRandomQuestion, fetchQuestionById } from "./api"; //importing our two functions for fetching questions 
+import { fetchRandomQuestion, validatePlacement } from "./api"; //importing the two functions for fetching questions 
 import "./QuestionPlacement.css";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 //imports from dnd website 
@@ -12,58 +12,84 @@ function QuestionPlacement() {
   const [lineQuestions, setLineQuestions] = useState([]);
   const [score, setScore] = useState(0);   //players score
   const [message, setMessage] = useState(""); //used for feedback errors
+  const [isValidating, setIsValidating] = useState(false);
 
-  //*********************   function for handling an object being dragged   *********************
-  function handleDragEnd(dragEvent) {
-    const { active, over } = dragEvent;
-    //if the question card is not over a drop zone, dont do anything
-    if(!over){
-      return;
-    }
-    //if something is being dragged that isnt the current question card, do nothing
-    if(active.id !== "current-card"){
-      return;
-    }
-    //if theres a bug and no question loads, do nothing
-    if(!currentQuestion){
-      return;
-    }
-    //the "over id" is the slots id that a card can be dragged into
-    const slotId = over.id;
-    if(!slotId.startsWith("slot-")){
-      return;
-    }
-
-    const indexString = slotId.replace("slot-", ""); //the slots are labled slot-X, so we're just removing the "slot-", so the indexString contains numbers only
-    const insertIndex = parseInt(indexString, 10); //using number base 10 (decimal, 0-9) as apposed to other forms lik ebinary or hex
-
-    if(Number.isNaN(insertIndex)){ //checks that the slot number inserted into the indexString was actually a number - for debugging
-      return;
-    }
-
-    /* Creating new question card with id and question, id will look like "card-xx", it either picks the current question card ID or assign a random number based off current time*/
-    //?? mean sthat whatever is on the right side will be used if th eleft side is null or undefined
-    const newCard = {id: `card-${currentQuestion.id ?? Date.now()}`,questionId: currentQuestion.id, question: currentQuestion};
-
-    // Insert this card into lineQuestions at the chosen position
-    setLineQuestions((prev) => { //latest state will be returned as "prev"
-      const next = [...prev]; //spread operator to copy whole array, use this to avoid mutating a state directly *******
-      next.splice(insertIndex, 0, newCard); //splice syntax: array.splice(whereToInsert, deleteCount, itemToInsert)
-      return next;
-    });
-
-    setScore((prevScore) => prevScore + 1); //increase score by 1
-    setCurrentQuestion(null); //clear current card so it can't be dragged again
-    loadNextQuestion(); //load the next question from the backend
+  //set helepr to reset the number line to an empty array and the score to 0
+  const resetGame = () => {
+    setLineQuestions([]);
+    setScore(0);
   }
 
+  //*********************   function for handling an object being dragged   *********************
+ const handleDragEnd = async (event) => {
+  setMessage("");
+
+  const { over, active } = event;
+
+  // Only handle drops of the current card
+  if (!over || !currentQuestion) return;
+  if (active?.id !== "current-card") return;
+
+  const slotId = over.id.toString();
+  if (!slotId.startsWith("slot-")) return;
+
+  const insertIndex = parseInt(slotId.replace("slot-", ""), 10);
+  if (Number.isNaN(insertIndex)) return;
+
+  // Neighbors are read from the CURRENT line (before insertion)
+  const left = insertIndex - 1 >= 0 ? lineQuestions[insertIndex - 1] : null;
+  const right = insertIndex < lineQuestions.length ? lineQuestions[insertIndex] : null;
+
+  const leftNeighborId = left ? left.questionId : null;
+  const rightNeighborId = right ? right.questionId : null;
+
+  setIsValidating(true);
+  try {
+    const result = await validatePlacement({
+      placedQuestionId: currentQuestion.id,
+      leftNeighborId,
+      rightNeighborId,
+    });
+
+    if (result.correct) {
+      const newCard = {
+        id: `card-${currentQuestion.id}`,
+        questionId: currentQuestion.id,
+        question: currentQuestion,
+      };
+
+      const newLine = [...lineQuestions];
+      newLine.splice(insertIndex, 0, newCard);
+
+      setLineQuestions(newLine);
+      setScore((prev) => prev + 1);
+
+      setCurrentQuestion(null);
+      loadNextQuestion();
+      return;
+    }
+
+    // Incorrect placement => end game and reset
+    setMessage("Incorrect placement. Game reset.");
+    resetGame();
+    setCurrentQuestion(null);
+    loadNextQuestion();
+  } catch (err) {
+    console.error(err);
+    setMessage("Validation failed due to a server error. Try again.");
+  } finally {
+    setIsValidating(false);
+  }
+};
+
+
   //********************* The current card - draggable, style *********************
-  function CurrentQuestionCard({question}){
+  function CurrentQuestionCard({question, isDisabled}){
     //attributes - , listneers - event handlers (cursor change...), setNodeRef - pass this to the element uou want to be draggable (DnD Kit), transform - how far its being dragged, isDragging - Boolean (useful fo rCSS)
     const { attributes, listeners, setNodeRef, transform, isDragging } = 
       useDraggable({
         id: "current-card", //unique id for draggable card 
-        disabled: !question, // dont drag when no question
+        disabled: !question || isValidating, // dont drag when no question
     });
 
     const style = {
@@ -127,8 +153,6 @@ function QuestionPlacement() {
       setMessage("Could not load question from backend.");
     }
   }
-
-
   useEffect(() => {loadNextQuestion();}, []); //this run safter the initial render of the webpage. the empty array tells it to only run once 
 
 //What will show up on the webpage - everything inside div.
@@ -139,7 +163,7 @@ function QuestionPlacement() {
           <h1>Question Placement Testing</h1>
 
           <div className="number-line">
-            <CurrentQuestionCard question={currentQuestion} />
+            <CurrentQuestionCard question={currentQuestion} isDisabled={isValidating} />
             <strong>Score:</strong> {score}
           </div>
 
@@ -155,14 +179,10 @@ function QuestionPlacement() {
           <div className="number-line"> 
           <div className="number-box boundary-box">0</div>
           <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
-          <DroppableSlot slotIndex={lineQuestions.length} />  {/* Final slot after the last question */}
           <div className="number-box boundary-box">   {/* Right boundary: infinity*/}
             <FaInfinity />
           </div>
         </div>
-
-          <button className="qp-button" onClick={loadNextQuestion}>Load another random question</button>
-
         </div>
       </div>
     </DndContext>
