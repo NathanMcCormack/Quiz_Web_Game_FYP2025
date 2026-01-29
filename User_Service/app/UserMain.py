@@ -7,8 +7,12 @@ from .UserDatabase import engine, SessionLocal
 from .UserModels import Base, UserDB 
 from .UserSchemas import UserCreate, UserRead 
 
+@asynccontextmanager 
+async def lifespan(app: FastAPI): 
+    Base.metadata.create_all(bind=engine)    
+    yield 
+
 app = FastAPI()
-Base.metadata.create_all(bind=engine)
 
 @app.get("/health")
 def get_users():
