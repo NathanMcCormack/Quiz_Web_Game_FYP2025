@@ -130,7 +130,9 @@ def validate_placement(payload: ValidatePlacementRequest, db: Session=Depends(ge
         raise HTTPException(status_code=404, detail="Placed question not found")
     left=None
     right=None
+    #if there is a crad on the left
     if payload.left_neighbor_id is not None:
+        #get the id from db
         left=db.get(QuestionDB, payload.left_neighbor_id)
         if not left:
             raise HTTPException(status_code=404, detail="Left neighbor question not found")
