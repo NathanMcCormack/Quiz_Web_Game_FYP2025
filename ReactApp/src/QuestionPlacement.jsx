@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"; //useState lets the component store values and update them, useEffect... 
 import { fetchRandomQuestion, validatePlacement } from "./api"; //importing the two functions for fetching questions 
 import "./QuestionPlacement.css";
+import GameOverPopUp from "./GameOverPopUp";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 //imports from dnd website 
 import { DndContext, closestCenter, useDraggable, useDroppable } from "@dnd-kit/core";
@@ -13,11 +14,19 @@ function QuestionPlacement() {
   const [score, setScore] = useState(0);   //players score
   const [message, setMessage] = useState(""); //used for feedback errors
   const [isValidating, setIsValidating] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [lastScore, setLastScore] = useState(0);
 
+  const startNewGame = async () => {
+  setIsGameOver(false);
+  setCurrentQuestion(null);
+  await loadNextQuestion();
+  };
   //set helepr to reset the number line to an empty array and the score to 0
   const resetGame = () => {
     setLineQuestions([]);
     setScore(0);
+    setMessage("");
   }
 
   //*********************   function for handling an object being dragged   *********************
@@ -69,11 +78,12 @@ function QuestionPlacement() {
       return;
     }
 
-    // Incorrect placement => end game and reset
-    setMessage("Incorrect placement. Game reset.");
-    resetGame();
+    // Incorrect placement => end game, show modal (blocking)
+    setLastScore(score);
+    resetGame();             // clears line + score
+    setIsGameOver(true);     // blocks UI until restart
     setCurrentQuestion(null);
-    loadNextQuestion();
+    
   } catch (err) {
     console.error(err);
     setMessage("Validation failed due to a server error. Try again.");
@@ -158,6 +168,7 @@ function QuestionPlacement() {
 //What will show up on the webpage - everything inside div.
   return (
      <DndContext onDragEnd={handleDragEnd}>
+      <GameOverPopUp open={isGameOver} score={lastScore} onStartNewGame={startNewGame} />
       <div className="page-center">
         <div className="qp-card">
           <h1>Question Placement Testing</h1>
