@@ -1,29 +1,37 @@
 import sys
 from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-from app.GameMain import app, get_db  
-from app.GameModels import Base  
 
-TEST_DATABASE_URL = "sqlite+pysqlite:///:memory:"
+# Ensure Game_Service/ is on sys.path so `import app...` always works under pytest
+BASE_DIR = Path(__file__).resolve().parents[1]  # .../Game_Service
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
 
+from app.GameMain import app, get_db
+from app.GameModels import Base
 
-engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool,)
-
+TEST_DB_URL = "sqlite+pysqlite:///:memory:"
+engine = create_engine(
+    TEST_DB_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
 TestingSessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
-#start each test with a clean schema
+
 @pytest.fixture(autouse=True)
-def _reset_db():
+def reset_db():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield
 
-#FastAPI TestClient with DB dependency override
-@pytest.fixture()
+
+@pytest.fixture
 def client():
     def override_get_db():
         db = TestingSessionLocal()
