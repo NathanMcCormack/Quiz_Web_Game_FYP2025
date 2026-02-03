@@ -20,6 +20,9 @@ from .GameSchemas import (
     ValidatePlacementResponse,
 )
 
+from dotenv import load_dotenv
+load_dotenv()
+
 #creates a fastapi object called app - what we you for endpoints. @app.get/post/put/patch/delete. Also used for running the server - uvicorn main:app
 app = FastAPI()
 #looks at all tables made from Base and rceates them
