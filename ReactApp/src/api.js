@@ -31,3 +31,11 @@ export async function validatePlacement({ placedQuestionId, leftNeighborId, righ
   }
   return res.json();
 }
+
+export async function startGame({ category, difficulty }) {
+  const res = await axios.post(`${API_BASE_URL}/game/start`, {
+    category,
+    difficulty,
+  });
+  return res.data; // { session_id, questions: [...] }
+}

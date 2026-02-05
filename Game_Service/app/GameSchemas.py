@@ -2,7 +2,7 @@ from typing import Optional, Annotated, Literal
 from pydantic import BaseModel, ConfigDict, StringConstraints
 from annotated_types import Ge
 
-CategoryStr = Annotated[str, StringConstraints(pattern=r"^[A-Za-z]+(?: [A-Za-z]+)?$", min_length=1, max_length=64)] #1 oe 2 words that only contain alphabetical characters 
+CategoryStr = Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9][A-Za-z0-9 &'\\-]{0,63}$", min_length=1, max_length=64)] #1 oe 2 words that only contain alphabetical characters 
 QuestionStr = Annotated[str, StringConstraints(min_length=1, max_length=500)]
 AnswerInt   = Annotated[int, Ge(0)] #answer for question must be an int greater than or equal to 0
 Difficulty  = Literal["easy", "medium", "hard"] #Makes sure the only valeus for Diffficulty are easy, medium, hard. Using Literal
@@ -72,3 +72,11 @@ class ValidatePlacementResponse(BaseModel):
     placed_answer: AnswerInt
     left_answer: Optional[AnswerInt] = None
     right_answer: Optional[AnswerInt] = None
+
+class GameStartRequest(BaseModel):
+    category: CategoryStr
+    difficulty: Difficulty
+
+class GameStartResponse(BaseModel):
+    session_id: str
+    questions: list[QuestionReadPublic]

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from fastapi.middleware.cors import CORSMiddleware
-
+from typing import Optional
 from .GameDatabase import engine, SessionLocal
 from .GameModels import Base, QuestionDB, GameRunDB
 from .GameSchemas import (
@@ -19,6 +19,15 @@ from .GameSchemas import (
     ValidatePlacementRequest,
     ValidatePlacementResponse,
 )
+from pathlib import Path
+from dotenv import load_dotenv
+
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"   # Game_Service/.env
+load_dotenv(ENV_PATH)
+
+import uuid #generates univerally unique identifiers 
+from .QuestionGenerator import generate_questions
+from .GameSchemas import GameStartRequest, GameStartResponse
 
 #creates a fastapi object called app - what we you for endpoints. @app.get/post/put/patch/delete. Also used for running the server - uvicorn main:app
 app = FastAPI()
@@ -63,12 +72,22 @@ def list_questions(db: Session = Depends(get_db)):
     return db.execute(stmt).scalars().all()
 
 @app.get("/api/questions/random", response_model=QuestionReadPublic)
-def get_random_question(db: Session = Depends(get_db)):
-    stmt = select(QuestionDB).order_by(func.random()).limit(1) #uses a function to get one random question from the QestionDB table 
-    db_random_question = db.execute(stmt).scalars().first() #.execute - runs query, .scalars - returns values in the rows, .first - first row is returned. **this is only used fr get randm
+def get_random_question(category: Optional[str] = None,difficulty: Optional[str] = None,game_session_id: Optional[str] = None,db: Session = Depends(get_db),):
+    stmt = select(QuestionDB)
+
+    #can use this to fetch random categories, diffculty, or game sessions
+    if category:
+        stmt = stmt.where(QuestionDB.category == category)
+    if difficulty:
+        stmt = stmt.where(QuestionDB.difficulty == difficulty)
+    if game_session_id:
+        stmt = stmt.where(QuestionDB.game_session_id == game_session_id)
+
+    stmt = stmt.order_by(func.random()).limit(1)
+    db_random_question = db.execute(stmt).scalars().first()
     if not db_random_question:
-        raise HTTPException(status_code=404, detail="No questions available") #returns error if a question can't be found
-    return QuestionReadPublic.model_validate(db_random_question) #returns the random question without the answer
+        raise HTTPException(status_code=404, detail="No questions available")
+    return QuestionReadPublic.model_validate(db_random_question)
 
 #Gets a specific Question which the frontend will use to validate correct answers
 @app.get("/api/questions/{question_id}", response_model=QuestionRead)
@@ -121,8 +140,52 @@ def delete_question(question_id: int, db: Session=Depends(get_db)):
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+#creates new sesion ID, generates 20 questions using OpenAI, saves them to the database under the sessions ID, returns teh sesionID and the saved questions to the frontend 
+@app.post("/api/game/start", response_model=GameStartResponse)
+def start_game(payload: GameStartRequest, db: Session = Depends(get_db)):
+    #generates a unique identifier for this game session 
+    session_id = str(uuid.uuid4())
+
+    #calls the openAI function and passes the needed parameters 
+    try:
+        generated = generate_questions(
+            category=payload.category,
+            difficulty=payload.difficulty,
+            count=20,
+        )
+    except Exception as e:
+        # log full error server-side
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=502, detail=f"Failed to generate questions: {str(e)}")
+
+    #convert the generated questions into teh DB rows and stage them for inserting 
+    db_rows: list[QuestionDB] = []
+    for q in generated:
+        row = QuestionDB(
+            question=q.question,
+            answer=q.answer,
+            category=q.category,
+            difficulty=q.difficulty,
+            game_session_id=session_id,
+        )
+        db.add(row)
+        db_rows.append(row)
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    for row in db_rows:
+        db.refresh(row)
+
+    #includes only what the player should see (no answer)
+    public_questions = [QuestionReadPublic.model_validate(r) for r in db_rows]
+    return GameStartResponse(session_id=session_id, questions=public_questions)
+
 #----------- Gameplay Validation -----------
-#This get
 @app.post("/api/game/validate-placement", response_model=ValidatePlacementResponse)
 def validate_placement(payload: ValidatePlacementRequest, db: Session=Depends(get_db)):
     placed = db.get(QuestionDB, payload.placed_question_id)
@@ -208,5 +271,6 @@ def get_leaderboard(db: Session = Depends(get_db)):
         {"user_id": r.user_id, "best_score": r.best_score, "best_streak": r.best_streak}
         for r in rows #returns multiple users with thei rallocated stats
     ]
+
 
 

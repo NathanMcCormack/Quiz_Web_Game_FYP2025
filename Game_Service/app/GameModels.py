@@ -13,6 +13,7 @@ class QuestionDB(Base):
     answer: Mapped[int] = mapped_column(Integer, nullable=False)  # integer >= 0
     category: Mapped[str] = mapped_column(String, nullable=False, index=True)
     difficulty: Mapped[str] = mapped_column(String, nullable=False)  #easy, medium, hard 
+    game_session_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True) #used to track the game session 
     created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
