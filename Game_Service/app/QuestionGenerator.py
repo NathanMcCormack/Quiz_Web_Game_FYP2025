@@ -28,23 +28,33 @@ def generate_questions(*, category: str, difficulty: Difficulty, count: int = 20
 #writing the prompts:
 #system prompt is my rules that the model has to follow 
 #the user prompt is the specific requests for this call 
-    system = (
-        "You generate timeline / numeric-ordering trivia questions for a quiz game.\n"
-        "Return exactly the requested number of items.\n"
-        "Rules:\n"
-        "- The answer MUST be a single integer >= 0.\n"
-        "- Mix 'year' questions and other numeric facts, but always make the number unambiguous.\n"
-        "- The question text must clearly state what the number represents (e.g., year, population, height in meters, etc.).\n"
-        "- Avoid duplicates and avoid controversial/ambiguous numbers.\n"
-        "- Keep questions safe for general audiences."
-    )
+system = (
+    "You generate trivia questions for a numeric-ordering (timeline/number) quiz game.\n"
+    "You MUST return exactly the requested number of items.\n"
+    "\n"
+    "Hard rules:\n"
+    "- Each item must have: question (string), answer (integer), category (string), difficulty (easy/medium/hard).\n"
+    "- answer MUST be a single whole number integer >= 0 (no decimals, no ranges, no lists).\n"
+    "- Do NOT use approximations: no 'about', 'around', 'circa', '~', 'est.', or 'approximately'.\n"
+    "- The question text MUST explicitly state what the number represents AND its unit "
+    "e.g. 'In what year...', 'How many minutes...', 'How many kilometers...', 'How many people...'.\n"
+    "- Answers must be unambiguous and based on widely accepted facts.\n"
+    "- Avoid controversy, sensitive topics, or ambiguous figures.\n"
+    "- Avoid duplicates: no repeated question prompts AND no repeated answers within the set.\n"
+    "\n"
+    "Content rules:\n"
+    "- Mix year-based questions and other numeric facts. Ensure non-year questions include clear units.\n"
+    "- Keep questions suitable for general audiences.\n"
+    "\n"
+    "If you cannot produce enough compliant items, regenerate internally until you can."
+)
 
-    user = (
-        f"Category: {category}\n"
-        f"Difficulty: {difficulty}\n"
-        f"Generate exactly {count} questions.\n"
-        "Output must match the schema strictly."
-    )
+user = (
+    f"Category: {category}\n"
+    f"Difficulty: {difficulty}\n"
+    f"Count: {count}\n"
+    "Return exactly Count items that strictly match the provided output schema."
+)
 
     #the code below is following the exact template form teh offical OpenAI reccomendations for validating the propmts response
     #sends the request to teh model and tells teh SDK to only accept an output that matches the schema above 
@@ -61,3 +71,20 @@ def generate_questions(*, category: str, difficulty: Difficulty, count: int = 20
     )
 
     parsed: GeneratedQuestionSet = resp.output_parsed
+
+    #checks that teh exact amount of questions were generated 
+    if len(parsed.questions) != count:
+        raise ValueError(f"Expected {count} questions, got {len(parsed.questions)}")
+
+    #used for safety to avoid model confusion, will valuidate the answer, clean up the question and overwrite the category and difficulty to ensure they are exactly what the user inputted
+    out: list[GeneratedQuestion] = []
+    for q in parsed.questions:
+        out.append(
+            GeneratedQuestion(
+                question=q.question.strip(), #strip() removes any characters before or after the text eg spaces, new lines or tabs 
+                answer=int(q.answer), #makes sure answer is an integer
+                category=category,
+                difficulty=difficulty,
+            )
+        )
+    return out
