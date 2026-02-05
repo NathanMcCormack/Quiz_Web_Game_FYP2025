@@ -13,6 +13,7 @@ venv/
 .env/
 .venv/
 env/
+.env
 
 # Packaging / build
 build/

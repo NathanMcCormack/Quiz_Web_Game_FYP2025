@@ -1,0 +1,37 @@
+.gp-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.gp-modal {
+  width: min(420px, 92vw);
+  background: rgb(69, 137, 158);
+  border-width: 14px;
+  border-radius: 14px;
+  border-color: black;
+  padding: 22px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.gp-title {
+  margin: 0 0 10px;
+}
+
+.gp-text {
+  margin: 0 0 16px;
+}
+
+.gp-button {
+  background-color: rgb(39, 219, 93);
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}

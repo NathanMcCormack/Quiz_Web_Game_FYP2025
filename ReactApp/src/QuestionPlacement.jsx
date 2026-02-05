@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react"; //useState lets the component store values and update them, useEffect... 
-import { fetchRandomQuestion, fetchQuestionById } from "./api"; //importing our two functions for fetching questions 
+import React, {useState } from "react"; //useState lets the component store values and update them
+import { startGame, validatePlacement } from "./api"; //importing the two functions for fetching questions 
 import "./QuestionPlacement.css";
+import GameOverPopUp from "./GameOverPopUp";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 //imports from dnd website 
 import { DndContext, closestCenter, useDraggable, useDroppable } from "@dnd-kit/core";
@@ -12,58 +13,114 @@ function QuestionPlacement() {
   const [lineQuestions, setLineQuestions] = useState([]);
   const [score, setScore] = useState(0);   //players score
   const [message, setMessage] = useState(""); //used for feedback errors
+  const [isValidating, setIsValidating] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [lastScore, setLastScore] = useState(0);
+  const [categoryInput, setCategoryInput] = useState("");
+  const [difficultyInput, setDifficultyInput] = useState("easy");
+  const [deck, setDeck] = useState([]); // remaining questions
+  const [sessionId, setSessionId] = useState(null);
 
-  //*********************   function for handling an object being dragged   *********************
-  function handleDragEnd(dragEvent) {
-    const { active, over } = dragEvent;
-    //if the question card is not over a drop zone, dont do anything
-    if(!over){
-      return;
-    }
-    //if something is being dragged that isnt the current question card, do nothing
-    if(active.id !== "current-card"){
-      return;
-    }
-    //if theres a bug and no question loads, do nothing
-    if(!currentQuestion){
-      return;
-    }
-    //the "over id" is the slots id that a card can be dragged into
-    const slotId = over.id;
-    if(!slotId.startsWith("slot-")){
-      return;
-    }
+const [endTitle, setEndTitle] = useState("Game Over!");
+const [endSubtitle, setEndSubtitle] = useState("Try Again!");
 
-    const indexString = slotId.replace("slot-", ""); //the slots are labled slot-X, so we're just removing the "slot-", so the indexString contains numbers only
-    const insertIndex = parseInt(indexString, 10); //using number base 10 (decimal, 0-9) as apposed to other forms lik ebinary or hex
-
-    if(Number.isNaN(insertIndex)){ //checks that the slot number inserted into the indexString was actually a number - for debugging
-      return;
-    }
-
-    /* Creating new question card with id and question, id will look like "card-xx", it either picks the current question card ID or assign a random number based off current time*/
-    //?? mean sthat whatever is on the right side will be used if th eleft side is null or undefined
-    const newCard = {id: `card-${currentQuestion.id ?? Date.now()}`,question: currentQuestion};
-
-    // Insert this card into lineQuestions at the chosen position
-    setLineQuestions((prev) => { //latest state will be returned as "prev"
-      const next = [...prev]; //spread operator to copy whole array, use this to avoid mutating a state directly *******
-      next.splice(insertIndex, 0, newCard); //splice syntax: array.splice(whereToInsert, deleteCount, itemToInsert)
-      return next;
-    });
-
-    setScore((prevScore) => prevScore + 1); //increase score by 1
-    setCurrentQuestion(null); //clear current card so it can't be dragged again
-    loadNextQuestion(); //load the next question from the backend
+  const startNewGame = async () => {
+    setIsGameOver(false);
+    setCurrentQuestion(null);
+    setDeck([]);
+    setSessionId(null);
+    setMessage("");
+    // category/difficulty remain as user entered, so they can just press Start again
+  };
+  //set helepr to reset the number line to an empty array and the score to 0
+  const resetGame = () => {
+    setLineQuestions([]);
+    setScore(0);
+    setMessage("");
   }
 
+  //*********************   function for handling an object being dragged   *********************
+ const handleDragEnd = async (event) => {
+  //clears any old messages 
+  setMessage("");
+
+  const { over, active } = event;
+
+  //only handle drops of the current card
+  if (!over || !currentQuestion) return;
+  if (active?.id !== "current-card") return;
+
+  const slotId = over.id.toString();
+  if (!slotId.startsWith("slot-")) return;
+
+  const insertIndex = parseInt(slotId.replace("slot-", ""), 10);
+  if (Number.isNaN(insertIndex)) return;
+
+  // Neighbors are read from the CURRENT line (before insertion)
+  const left = insertIndex - 1 >= 0 ? lineQuestions[insertIndex - 1] : null;
+  const right = insertIndex < lineQuestions.length ? lineQuestions[insertIndex] : null;
+
+  const leftNeighborId = left ? left.questionId : null;
+  const rightNeighborId = right ? right.questionId : null;
+
+  setIsValidating(true);
+  try {
+    const result = await validatePlacement({
+      placedQuestionId: currentQuestion.id,
+      leftNeighborId,
+      rightNeighborId,
+    });
+
+    if (result.correct) {
+      const newCard = {
+        id: `card-${currentQuestion.id}`,
+        questionId: currentQuestion.id,
+        question: currentQuestion,
+      };
+
+      const newLine = [...lineQuestions];
+      newLine.splice(insertIndex, 0, newCard);
+
+      setLineQuestions(newLine);
+      setScore((prev) => prev + 1);
+      setCurrentQuestion(null);
+
+      // If this placement just completed the 20th card, win:
+      const placedCount = newLine.length;
+      if (placedCount >= 20) {
+        setEndTitle("You Win!");
+        setEndSubtitle("You placed all questions correctly 🎉");
+        setLastScore(score + 1); // because score increments after success
+        resetGame();
+        setIsGameOver(true);
+        return;
+      }
+      loadNextFromDeck(deck);
+      return;
+    }
+
+    // Incorrect placement => end game, show modal (blocking)
+    setLastScore(score);
+    resetGame();             // clears line + score
+    setIsGameOver(true);     // blocks UI until restart
+    setCurrentQuestion(null);
+    
+  } catch (err) {
+    console.error(err);
+    setMessage("Validation failed due to a server error. Try again.");
+  } finally {
+    setIsValidating(false);
+  }
+};
+
+
   //********************* The current card - draggable, style *********************
-  function CurrentQuestionCard({question}){
+  function CurrentQuestionCard({question, isDisabled}){
     //attributes - , listneers - event handlers (cursor change...), setNodeRef - pass this to the element uou want to be draggable (DnD Kit), transform - how far its being dragged, isDragging - Boolean (useful fo rCSS)
     const { attributes, listeners, setNodeRef, transform, isDragging } = 
       useDraggable({
         id: "current-card", //unique id for draggable card 
-        disabled: !question, // dont drag when no question
+        disabled: !question || isValidating, // dont drag when no question
     });
 
     const style = {
@@ -115,31 +172,110 @@ function QuestionPlacement() {
     );
   } 
 
-  //******************* fetchRandomQuestion - grabs new question from backend - async so we can use await for API calls ******************8
-  async function loadNextQuestion() {
-    try {
-      const q = await fetchRandomQuestion(); //call our function sto call a random question from the backend
-      console.log("Loaded random question: ", q); //message to the console 
-      setCurrentQuestion(q);
-      setMessage("");
-    } catch (err) { //if it fails to get a question form the backend, the error message below will be returned
-      console.error("Failed to load random question: ", err);
-      setMessage("Could not load question from backend.");
+  function loadNextFromDeck(nextDeck) {
+    //if the player has placed all questions correctly 
+    if (!nextDeck || nextDeck.length === 0) {
+      setEndTitle("You Win!");
+      setEndSubtitle("Congradulations, You placed all questions correctly");
+      setLastScore(score);
+      resetGame();
+      setIsGameOver(true);
+      setCurrentQuestion(null);
+      return;
     }
+
+    //next is the question that will be shown Qn, rest is the rest of the questions Qn+1, Qn+2...
+    const [next, ...rest] = nextDeck;
+    setCurrentQuestion(next); //updates current question 
+    setDeck(rest); //sets the state to teh rest of the questions 
   }
 
+  const handleStartGame = async () => {
+  setMessage("");
 
-  useEffect(() => {loadNextQuestion();}, []); //this run safter the initial render of the webpage. the empty array tells it to only run once 
+  if (!categoryInput.trim()) { //trim removes any spaces before or after the category 
+    setMessage("Please enter a category.");
+    return;
+  }
+
+  //resets the game before starting 
+  setIsGameOver(false);
+  resetGame();
+  setCurrentQuestion(null);
+
+  //calls the backend to start a new session 
+  try {
+    const data = await startGame({
+      category: categoryInput.trim(),
+      difficulty: difficultyInput,
+    });
+
+    setSessionId(data.session_id); //save sthe sessions ID inm the state, used for fetching random questions in this state 
+
+    // Shuffle questions client-side (so it's not always DB insert order)
+    const qs = [...data.questions];
+    for (let i = qs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [qs[i], qs[j]] = [qs[j], qs[i]];
+    }
+
+    // put into deck and load first
+    setDeck(qs.slice(1));
+    setCurrentQuestion(qs[0]);
+  } catch (err) {
+    console.error(err);
+    setMessage("Failed to start game (AI generation error). Try again.");
+  }
+  };
 
 //What will show up on the webpage - everything inside div.
   return (
      <DndContext onDragEnd={handleDragEnd}>
+      <GameOverPopUp open={isGameOver} score={lastScore} onStartNewGame={startNewGame} title={endTitle} subtitle={endSubtitle}/>
       <div className="page-center">
         <div className="qp-card">
           <h1>Question Placement Testing</h1>
 
+          <div className="setup-panel">
+            <h2>Start a new game</h2>
+
+            <label>
+              Category:
+              <input
+                type="text"
+                value={categoryInput} //the players input will always display in the current React state
+                onChange={(e) => setCategoryInput(e.target.value)} //updates teh state whenever the user types in, typing then triggers teh setCategoryInput, and the value updates 
+                placeholder="eg Premier League, 90s Music..."
+                disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0} //the category input becomes disbaled when: backend check in porgress, a gamne is in progress, there are any questions placed
+              />
+            </label>
+
+            <label>
+              Difficulty:
+              <select
+                value={difficultyInput}
+                onChange={(e) => setDifficultyInput(e.target.value)}
+                disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
+              >
+                <option value="easy">easy</option>
+                <option value="medium">medium</option>
+                <option value="hard">hard</option>
+              </select>
+            </label>
+
+            <button onClick={handleStartGame} disabled={isValidating}>
+              Start Game
+            </button>
+
+            {sessionId && (
+              <p style={{ fontSize: "12px", opacity: 0.7 }}>
+                Session: {sessionId}
+              </p>
+            )}
+          </div>
+
           <div className="number-line">
-            <CurrentQuestionCard question={currentQuestion} />
+            <CurrentQuestionCard question={currentQuestion} isDisabled={isValidating} />
             <strong>Score:</strong> {score}
           </div>
 
@@ -155,14 +291,10 @@ function QuestionPlacement() {
           <div className="number-line"> 
           <div className="number-box boundary-box">0</div>
           <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
-          <DroppableSlot slotIndex={lineQuestions.length} />  {/* Final slot after the last question */}
           <div className="number-box boundary-box">   {/* Right boundary: infinity*/}
             <FaInfinity />
           </div>
         </div>
-
-          <button className="qp-button" onClick={loadNextQuestion}>Load another random question</button>
-
         </div>
       </div>
     </DndContext>
