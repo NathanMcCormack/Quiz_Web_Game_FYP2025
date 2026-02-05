@@ -45,3 +45,19 @@ def generate_questions(*, category: str, difficulty: Difficulty, count: int = 20
         f"Generate exactly {count} questions.\n"
         "Output must match the schema strictly."
     )
+
+    #the code below is following the exact template form teh offical OpenAI reccomendations for validating the propmts response
+    #sends the request to teh model and tells teh SDK to only accept an output that matches the schema above 
+    resp = client.responses.parse(
+        model=model,
+        input=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        #the schema I want it to follow 
+        text_format=GeneratedQuestionSet,
+        # prevents storing teh request/response for privacy/data retention 
+        store=False,
+    )
+
+    parsed: GeneratedQuestionSet = resp.output_parsed
