@@ -25,36 +25,36 @@ def generate_questions(*, category: str, difficulty: Difficulty, count: int = 20
     model = os.getenv("OPENAI_MODEL", "gpt-5-mini")
     client = OpenAI()
 
-#writing the prompts:
-#system prompt is my rules that the model has to follow 
-#the user prompt is the specific requests for this call 
-system = (
-    "You generate trivia questions for a numeric-ordering (timeline/number) quiz game.\n"
-    "You MUST return exactly the requested number of items.\n"
-    "\n"
-    "Hard rules:\n"
-    "- Each item must have: question (string), answer (integer), category (string), difficulty (easy/medium/hard).\n"
-    "- answer MUST be a single whole number integer >= 0 (no decimals, no ranges, no lists).\n"
-    "- Do NOT use approximations: no 'about', 'around', 'circa', '~', 'est.', or 'approximately'.\n"
-    "- The question text MUST explicitly state what the number represents AND its unit "
-    "e.g. 'In what year...', 'How many minutes...', 'How many kilometers...', 'How many people...'.\n"
-    "- Answers must be unambiguous and based on widely accepted facts.\n"
-    "- Avoid controversy, sensitive topics, or ambiguous figures.\n"
-    "- Avoid duplicates: no repeated question prompts AND no repeated answers within the set.\n"
-    "\n"
-    "Content rules:\n"
-    "- Mix year-based questions and other numeric facts. Ensure non-year questions include clear units.\n"
-    "- Keep questions suitable for general audiences.\n"
-    "\n"
-    "If you cannot produce enough compliant items, regenerate internally until you can."
-)
+    #writing the prompts:
+    #system prompt is my rules that the model has to follow 
+    #the user prompt is the specific requests for this call 
+    system = (
+        "You generate trivia questions for a numeric-ordering (timeline/number) quiz game.\n"
+        "You MUST return exactly the requested number of items.\n"
+        "\n"
+        "Hard rules:\n"
+        "- Each item must have: question (string), answer (integer), category (string), difficulty (easy/medium/hard).\n"
+        "- answer MUST be a single whole number integer >= 0 (no decimals, no ranges, no lists).\n"
+        "- Do NOT use approximations: no 'about', 'around', 'circa', '~', 'est.', or 'approximately'.\n"
+        "- The question text MUST explicitly state what the number represents AND its unit "
+        "e.g. 'In what year...', 'How many minutes...', 'How many kilometers...', 'How many people...'.\n"
+        "- Answers must be unambiguous and based on widely accepted facts.\n"
+        "- Avoid controversy, sensitive topics, or ambiguous figures.\n"
+        "- Avoid duplicates: no repeated question prompts AND no repeated answers within the set.\n"
+        "\n"
+        "Content rules:\n"
+        "- Mix year-based questions and other numeric facts. Ensure non-year questions include clear units.\n"
+        "- Keep questions suitable for general audiences.\n"
+        "\n"
+        "If you cannot produce enough compliant items, regenerate internally until you can."
+    )
 
-user = (
-    f"Category: {category}\n"
-    f"Difficulty: {difficulty}\n"
-    f"Count: {count}\n"
-    "Return exactly Count items that strictly match the provided output schema."
-)
+    user = (
+        f"Category: {category}\n"
+        f"Difficulty: {difficulty}\n"
+        f"Count: {count}\n"
+        "Return exactly Count items that strictly match the provided output schema."
+    )
 
     #the code below is following the exact template form teh offical OpenAI reccomendations for validating the propmts response
     #sends the request to teh model and tells teh SDK to only accept an output that matches the schema above 

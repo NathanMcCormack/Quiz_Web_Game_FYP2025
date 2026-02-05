@@ -19,9 +19,11 @@ from .GameSchemas import (
     ValidatePlacementRequest,
     ValidatePlacementResponse,
 )
-#reads teh .env file
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()
+
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"   # Game_Service/.env
+load_dotenv(ENV_PATH)
 
 import uuid #generates univerally unique identifiers 
 from .QuestionGenerator import generate_questions
@@ -152,7 +154,10 @@ def start_game(payload: GameStartRequest, db: Session = Depends(get_db)):
             count=20,
         )
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Failed to generate questions: {e}")
+        # log full error server-side
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=502, detail=f"Failed to generate questions: {str(e)}")
 
     #convert the generated questions into teh DB rows and stage them for inserting 
     db_rows: list[QuestionDB] = []
