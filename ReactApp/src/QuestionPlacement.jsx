@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"; //useState lets the component store values and update them, useEffect... 
-import { fetchRandomQuestion, validatePlacement } from "./api"; //importing the two functions for fetching questions 
+import { startGame, validatePlacement } from "./api"; //importing the two functions for fetching questions 
 import "./QuestionPlacement.css";
 import GameOverPopUp from "./GameOverPopUp";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
@@ -16,6 +16,13 @@ function QuestionPlacement() {
   const [isValidating, setIsValidating] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [lastScore, setLastScore] = useState(0);
+  const [categoryInput, setCategoryInput] = useState("");
+  const [difficultyInput, setDifficultyInput] = useState("easy");
+  const [deck, setDeck] = useState([]); // remaining questions
+  const [sessionId, setSessionId] = useState(null);
+
+const [endTitle, setEndTitle] = useState("Game Over!");
+const [endSubtitle, setEndSubtitle] = useState("Try Again!");
 
   const startNewGame = async () => {
   setIsGameOver(false);
