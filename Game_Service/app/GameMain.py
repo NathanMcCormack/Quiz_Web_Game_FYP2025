@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional 
+from typing import Optional
 from .GameDatabase import engine, SessionLocal
 from .GameModels import Base, QuestionDB, GameRunDB
 from .GameSchemas import (
@@ -70,12 +70,22 @@ def list_questions(db: Session = Depends(get_db)):
     return db.execute(stmt).scalars().all()
 
 @app.get("/api/questions/random", response_model=QuestionReadPublic)
-def get_random_question(db: Session = Depends(get_db)):
-    stmt = select(QuestionDB).order_by(func.random()).limit(1) #uses a function to get one random question from the QestionDB table 
-    db_random_question = db.execute(stmt).scalars().first() #.execute - runs query, .scalars - returns values in the rows, .first - first row is returned. **this is only used fr get randm
+def get_random_question(category: Optional[str] = None,difficulty: Optional[str] = None,game_session_id: Optional[str] = None,db: Session = Depends(get_db),):
+    stmt = select(QuestionDB)
+
+    #can use this to fetch random categories, diffculty, or game sessions
+    if category:
+        stmt = stmt.where(QuestionDB.category == category)
+    if difficulty:
+        stmt = stmt.where(QuestionDB.difficulty == difficulty)
+    if game_session_id:
+        stmt = stmt.where(QuestionDB.game_session_id == game_session_id)
+
+    stmt = stmt.order_by(func.random()).limit(1)
+    db_random_question = db.execute(stmt).scalars().first()
     if not db_random_question:
-        raise HTTPException(status_code=404, detail="No questions available") #returns error if a question can't be found
-    return QuestionReadPublic.model_validate(db_random_question) #returns the random question without the answer
+        raise HTTPException(status_code=404, detail="No questions available")
+    return QuestionReadPublic.model_validate(db_random_question)
 
 #Gets a specific Question which the frontend will use to validate correct answers
 @app.get("/api/questions/{question_id}", response_model=QuestionRead)
