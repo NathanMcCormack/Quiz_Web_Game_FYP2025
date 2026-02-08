@@ -151,7 +151,7 @@ def start_game(payload: GameStartRequest, db: Session = Depends(get_db)):
         generated = generate_questions(
             category=payload.category,
             difficulty=payload.difficulty,
-            count=20,
+            count=8,
         )
     except Exception as e:
         # log full error server-side

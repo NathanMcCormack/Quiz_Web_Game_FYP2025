@@ -19,7 +19,7 @@ class GeneratedQuestionSet(BaseModel):
 #function for generating the questions
 #* forces keyword-only arguments meaning it must be caled like (category="Math", difficulty = "hard", count=20). It avoids accidental mix-ups 
 #it tghen returns a list of generated questions 
-def generate_questions(*, category: str, difficulty: Difficulty, count: int = 20) -> list[GeneratedQuestion]:
+def generate_questions(*, category: str, difficulty: Difficulty, count: int = 8) -> list[GeneratedQuestion]:
 
     #choosing which model to use
     model = os.getenv("OPENAI_MODEL", "gpt-5-mini")
