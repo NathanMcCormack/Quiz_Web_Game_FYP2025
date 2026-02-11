@@ -1,0 +1,7 @@
+.footerbar {
+  background: #bbc2cf;
+  border-top: 1px solid #2b3446;
+  bottom: 0;
+  width: 100vw;
+  min-height: 72px;   /* thickness */
+}

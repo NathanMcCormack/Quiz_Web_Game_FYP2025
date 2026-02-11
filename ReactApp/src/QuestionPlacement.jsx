@@ -6,7 +6,7 @@ import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons 
 //imports from dnd website 
 import { DndContext, closestCenter, useDraggable, useDroppable } from "@dnd-kit/core";
 import TopBar from "./components/TopBar";
-
+import FooterBar from "./components/FooterBar";
 
 
 function QuestionPlacement() {
@@ -289,12 +289,13 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
           <p>
           </p>
           <div className="number-line"> 
-          <div className="number-box boundary-box">0</div>
+            <div className="number-box boundary-box">0</div>
           <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
-          <div className="number-box boundary-box">   {/* Right boundary: infinity*/}
-            <FaInfinity />
+            <div className="number-box boundary-box">   {/* Right boundary: infinity*/}
+              <FaInfinity />
+            </div>
           </div>
-        </div>
+        <FooterBar />
         </div>
       </div>
     </DndContext>
