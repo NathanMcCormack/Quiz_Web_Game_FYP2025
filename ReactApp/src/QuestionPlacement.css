@@ -8,10 +8,8 @@ body {
 }
 
 .qp-card {
-  background: #b9c9c3;
+  background: rgb(185, 201, 195);
   padding: 2rem 2.5rem; /* rem is from the root HTML size, so using rem instead of px for fonts, margins and padding keep it consistent*/
-  border-radius: 12px;
-  max-width: 1200px;
   width: 100%;
   opacity: 75%;
 }
@@ -20,7 +18,7 @@ body {
   display: flex;          
   justify-content: center;  /* center left/right */
   align-items: center;   
-  min-height: 100vh; /*this line places the div in the center of the page. vh - viewport height, 100vh - element will be as tall as the screen*/
+  min-height: 80vh; /*this line places the div in the center of the page. vh - viewport height, 100vh - element will be as tall as the screen*/
 }
 
 .qp-button {
@@ -52,28 +50,13 @@ body {
   margin: 1.5rem 0; /* space above/below the row */
 }
 
-.number-box {
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
-  border: 2px solid #2563eb;  
-  background: #eff6ff;        
-  color: #1d4ed8;            
-  font-size: 2rem; /* makes 0 and infinity symbol bigger */
-  font-weight: 600;
-  display: flex; /* center text inside the box */
-  align-items: center;        
-  justify-content: center;    
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); 
-}
-
 .current-question{
   margin: 1rem auto 2rem auto;
   padding: 1rem 1.5rem;
   max-width: 500px;
   text-align: left;
-  border-radius: 12px;
-  border: 2px solid #2563eb;  
+  border-radius: 8px;
+  border: 3px solid #2563eb;  
   background: #eff6ff;        
   color: #1d4ed8;             
   font-weight: 600;     
@@ -112,18 +95,22 @@ body {
 
 /* 0, ininity and placed question boxes */
 .number-box {
-  min-width: 90px;
-  min-height: 70px;
+  min-width: 80px;
+  max-width: 160px;
+  min-height: 140px;
+  max-height: 140px;
   padding: 0.5rem;
-  border-radius: 10px;
-  border: 2px solid #2563eb;
+  border-radius: 8px;
+  border: 3px solid #2563eb;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: .9rem;
   text-align: center;
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+  color: #214bbd;
+  font-weight: 600;
 }
 
 /* placed question boxes */
@@ -134,7 +121,8 @@ body {
 /* boundaries */
 .boundary-box {
   background: #f1f5f9;
-  font-weight: 700;
+  font-weight: 500;
+  font-size: 3rem;
 }
 
 /* droppable slots between boxes */
@@ -142,8 +130,7 @@ body {
   width: 24px;
   height: 50px;
   border-radius: 12px;
-  border: 2px dashed transparent;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  border: 3px dashed transparent;
 }
 
 /* when a droppable slot is being hovered over by a card*/

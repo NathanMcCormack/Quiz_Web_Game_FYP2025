@@ -5,6 +5,8 @@ import GameOverPopUp from "./GameOverPopUp";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 //imports from dnd website 
 import { DndContext, closestCenter, useDraggable, useDroppable } from "@dnd-kit/core";
+import TopBar from "./components/TopBar";
+
 
 
 function QuestionPlacement() {
@@ -232,10 +234,9 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
   return (
      <DndContext onDragEnd={handleDragEnd}>
       <GameOverPopUp open={isGameOver} score={lastScore} onStartNewGame={startNewGame} title={endTitle} subtitle={endSubtitle}/>
+      <TopBar title="Quiz Game"/>
       <div className="page-center">
         <div className="qp-card">
-          <h1>Question Placement Testing</h1>
-
           <div className="setup-panel">
             <h2>Start a new game</h2>
 
@@ -257,9 +258,9 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
                 onChange={(e) => setDifficultyInput(e.target.value)}
                 disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
               >
-                <option value="easy">easy</option>
-                <option value="medium">medium</option>
-                <option value="hard">hard</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
               </select>
             </label>
 
@@ -268,7 +269,7 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
             </button>
 
             {sessionId && (
-              <p style={{ fontSize: "12px", opacity: 0.7 }}>
+              <p>
                 Session: {sessionId}
               </p>
             )}
@@ -286,7 +287,6 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
           )}
 
           <p>
-            <strong>Positions array:</strong>
           </p>
           <div className="number-line"> 
           <div className="number-box boundary-box">0</div>
