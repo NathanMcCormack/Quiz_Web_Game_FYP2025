@@ -3,13 +3,74 @@ div{
   color: #000000;
 }
 
-body {
+html, body, #root {
+  height: 100%;
   margin: 0;
+}
+
+
+.qp-shell {
+  height: 100vh;       /* lock to viewport */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;    /* stops the scroll */
+}
+
+/* middle region (category/difficulty area) */
+.qp-middle {
+  flex: 1;
+  display: flex;
+  overflow: hidden;    /* prevents scroll from middle content */
+}
+
+.qp-middle-inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 16px;
+
+  /* reserve space so content doesn't hide behind HUD/footer */
+  padding-bottom: 140px;  /* tweak if needed */
+}
+
+/* HUD banner: fixed so it never pushes page height */
+.qp-hud-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 72px;              /* exactly the footer height */
+  transform: translateY(15%);/* makes it lie on the footer */
+  z-index: 60;
+}
+
+/* bottom region */
+.qp-bottom {
+  position: relative;
+}
+
+/* target your existing banner container */
+.hudbanner {
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+
+  /* If your banner already has these styles, keep yours.
+     If not, these are reasonable defaults: */
+  background: #f3f6ff;
+  border: 1px solid #d7deef;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .qp-card {
   background: rgb(185, 201, 195);
-  padding: 2rem 2.5rem; /* rem is from the root HTML size, so using rem instead of px for fonts, margins and padding keep it consistent*/
+  padding: 26px 22px;
+  min-height: 485px;
   width: 100%;
   opacity: 75%;
 }

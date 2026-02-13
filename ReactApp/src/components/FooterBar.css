@@ -1,7 +1,12 @@
 .footerbar {
-  background: #bbc2cf;
+  background: #101827;
   border-top: 1px solid #2b3446;
+
+  position: fixed;
+  left: 0;
+  right: 0;
   bottom: 0;
-  width: 100vw;
-  min-height: 72px;   /* thickness */
+
+  min-height: 72px;
+  z-index: 40;
 }

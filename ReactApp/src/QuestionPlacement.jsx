@@ -232,72 +232,86 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
 
 //What will show up on the webpage - everything inside div.
   return (
-     <DndContext onDragEnd={handleDragEnd}>
+    <DndContext onDragEnd={handleDragEnd}>
       <GameOverPopUp open={isGameOver} score={lastScore} onStartNewGame={startNewGame} title={endTitle} subtitle={endSubtitle}/>
-      <TopBar title="Quiz Game"/>
-      <div className="page-center">
-        <div className="qp-card">
-          <div className="setup-panel">
-            <h2>Start a new game</h2>
+      <div className="qp-shell">
+        <TopBar title="Quiz Game"/>
 
-            <label>
-              Category:
-              <input
-                type="text"
-                value={categoryInput} //the players input will always display in the current React state
-                onChange={(e) => setCategoryInput(e.target.value)} //updates teh state whenever the user types in, typing then triggers teh setCategoryInput, and the value updates 
-                placeholder="eg Premier League, 90s Music..."
-                disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0} //the category input becomes disbaled when: backend check in porgress, a gamne is in progress, there are any questions placed
-              />
-            </label>
+        <div className="qp-middle">
+          <div className="qp-middle-inner">
+            <div className="setup-panel">
+              <h2>Start a new game</h2>
 
-            <label>
-              Difficulty:
-              <select
-                value={difficultyInput}
-                onChange={(e) => setDifficultyInput(e.target.value)}
-                disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </label>
+              <label>
+                Category:
+                <input
+                  type="text"
+                  value={categoryInput} //the players input will always display in the current React state
+                  onChange={(e) => setCategoryInput(e.target.value)} //updates teh state whenever the user types in, typing then triggers teh setCategoryInput, and the value updates 
+                  placeholder="eg Premier League, 90s Music..."
+                  disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0} //the category input becomes disbaled when: backend check in porgress, a gamne is in progress, there are any questions placed
+                />
+              </label>
 
-            <button onClick={handleStartGame} disabled={isValidating}>
-              Start Game
-            </button>
+              <label>
+                Difficulty:
+                <select
+                  value={difficultyInput}
+                  onChange={(e) => setDifficultyInput(e.target.value)}
+                  disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </label>
 
-            {sessionId && (
+              <button onClick={handleStartGame} disabled={isValidating}>
+                Start Game
+              </button>
+
+              {sessionId && (
+                <p>
+                  Session: {sessionId}
+                </p>
+              )}
+            </div>
+
+            {message && (
               <p>
-                Session: {sessionId}
+                <strong>Message:</strong> {message} 
               </p>
             )}
           </div>
+        </div>
 
-          <div className="number-line">
-            <CurrentQuestionCard question={currentQuestion} isDisabled={isValidating} />
-            <strong>Score:</strong> {score}
-          </div>
+        <div className="qp-bottom">
+          <div className="qp-hud-wrap">
+            <div className="page-center">
+              <div className="qp-card">
 
-          {message && (
-            <p>
-              <strong>Message:</strong> {message} 
-            </p>
-          )}
+                <div className="number-line">
+                  <CurrentQuestionCard question={currentQuestion} isDisabled={isValidating} />
+                  <strong>Score:</strong> {score}
+                </div>
 
-          <p>
-          </p>
-          <div className="number-line"> 
-            <div className="number-box boundary-box">0</div>
-          <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
-            <div className="number-box boundary-box">   {/* Right boundary: infinity*/}
-              <FaInfinity />
+                <p>
+                </p>
+
+                <div className="number-line"> 
+                  <div className="number-box boundary-box">0</div>
+                  <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
+                  <div className="number-box boundary-box">   {/* Right boundary: infinity*/}
+                    <FaInfinity />
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
-        <FooterBar />
         </div>
       </div>
+      <FooterBar />
     </DndContext>
   );
 }
