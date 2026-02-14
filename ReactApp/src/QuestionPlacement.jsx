@@ -8,7 +8,6 @@ import { DndContext, closestCenter, useDraggable, useDroppable } from "@dnd-kit/
 import TopBar from "./components/TopBar";
 import FooterBar from "./components/FooterBar";
 
-
 function QuestionPlacement() {
   // The question currently being placed
   const [currentQuestion, setCurrentQuestion] = useState(null); //setting usestate to NULL, to start off with currentQuestion
@@ -242,33 +241,37 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
             <div className="setup-panel">
               <h2>Start a new game</h2>
 
-              <label>
-                Category:
-                <input
-                  type="text"
-                  value={categoryInput} //the players input will always display in the current React state
-                  onChange={(e) => setCategoryInput(e.target.value)} //updates teh state whenever the user types in, typing then triggers teh setCategoryInput, and the value updates 
-                  placeholder="eg Premier League, 90s Music..."
-                  disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0} //the category input becomes disbaled when: backend check in porgress, a gamne is in progress, there are any questions placed
-                />
-              </label>
+              <div className="setup-row">
+                <label className="setup-field">
+                  <span className="setup-label">Category</span>
+                  <input
+                    className="setup-input"
+                    type="text"
+                    value={categoryInput} //the players input will always display in the current React state
+                    onChange={(e) => setCategoryInput(e.target.value)} //updates teh state whenever the user types in, typing then triggers teh setCategoryInput, and the value updates 
+                    placeholder="eg Premier League, 90s Music..."
+                    disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0} //the category input becomes disbaled when: backend check in porgress, a gamne is in progress, there are any questions placed
+                  />
+                </label>
 
-              <label>
-                Difficulty:
-                <select
-                  value={difficultyInput}
-                  onChange={(e) => setDifficultyInput(e.target.value)}
-                  disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
-                >
-                  <option value="easy">Easy</option>
-                  <option value="medium">Medium</option>
-                  <option value="hard">Hard</option>
-                </select>
-              </label>
+                <label className="setup-field">
+                  <span className="setup-label">Difficulty</span>
+                  <select
+                    className="setup-select"
+                    value={difficultyInput}
+                    onChange={(e) => setDifficultyInput(e.target.value)}
+                    disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
+                  >
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </label>
 
-              <button onClick={handleStartGame} disabled={isValidating}>
-                Start Game
-              </button>
+                <button className="setup-button" onClick={handleStartGame} disabled={isValidating}>
+                  Start Game
+                </button>
+              </div>
 
               {sessionId && (
                 <p>
@@ -314,6 +317,7 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
       <FooterBar />
     </DndContext>
   );
+
 }
 
 export default QuestionPlacement;

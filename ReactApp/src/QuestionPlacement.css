@@ -1,26 +1,61 @@
-div{
-  text-align: center;
-  color: #000000;
+/* =========================================================
+   THEME (NYT Classic: warm paper + ink)
+   ========================================================= */
+
+:root {
+  /* Paper palette */
+  --bg: #F4F1E8;        /* warm paper background */
+  --surface: #FFFEFA;   /* slightly warm surface */
+  --text: #1A1A1A;
+  --muted: #5F5A52;     /* warm muted text */
+  --border: #D8D1C4;    /* warm border */
+
+  /* Accent + states */
+  --accent: #2B6CB0;
+  --accent-soft: rgba(43, 108, 176, 0.14);
+
+  --success: #2F855A;
+  --danger: #C53030;
 }
+
+
+/* =========================================================
+   GLOBAL / BASE
+   ========================================================= */
 
 html, body, #root {
   height: 100%;
   margin: 0;
 }
 
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+div {
+  text-align: center;
+  color: var(--text);
+}
+
+
+/* =========================================================
+   PAGE LAYOUT (Shell / Middle / Bottom / HUD positioning)
+   ========================================================= */
 
 .qp-shell {
-  height: 100vh;       /* lock to viewport */
+  height: 100vh;                /* lock to viewport */
   display: flex;
   flex-direction: column;
-  overflow: hidden;    /* stops the scroll */
+  overflow: hidden;             /* stops scroll */
 }
 
 /* middle region (category/difficulty area) */
 .qp-middle {
   flex: 1;
   display: flex;
-  overflow: hidden;    /* prevents scroll from middle content */
+  overflow: hidden;             /* prevents scroll from middle content */
 }
 
 .qp-middle-inner {
@@ -29,18 +64,18 @@ html, body, #root {
   margin: 0 auto;
   padding: 18px 16px;
 
-  /* reserve space so content doesn't hide behind HUD/footer */
-  padding-bottom: 140px;  /* tweak if needed */
+  padding-bottom: 220px;
+  position: relative;           /* for divider line */
 }
 
-/* HUD banner: fixed so it never pushes page height */
-.qp-hud-wrap {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 72px;              /* exactly the footer height */
-  transform: translateY(15%);/* makes it lie on the footer */
-  z-index: 60;
+/* subtle divider under the setup panel (NYT structure) */
+.qp-middle-inner::after {
+  content: "";
+  display: block;
+  height: 1px;
+  max-width: 900px;
+  margin: 16px auto 0 auto;
+  background: rgba(60, 50, 35, 0.16);
 }
 
 /* bottom region */
@@ -48,18 +83,51 @@ html, body, #root {
   position: relative;
 }
 
-/* target your existing banner container */
+/* HUD banner: fixed so it never pushes page height */
+.qp-hud-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 72px;                 /* exactly the footer height */
+  transform: none;
+  z-index: 60;
+}
+
+
+/* =========================================================
+   CENTERING WRAPPER
+   ========================================================= */
+
+.page-center {
+  display: flex;
+  justify-content: center;       /* center left/right */
+  align-items: center;
+  min-height: 80vh;              /* places the div in the center of the page */
+}
+
+/* Don't vertically-center the HUD area */
+.qp-hud-wrap .page-center {
+  min-height: 0;                 /* overrides 80vh */
+  height: auto;
+  align-items: flex-end;         /* push banner down */
+  padding: 0;
+  margin: 0;
+}
+
+
+/* =========================================================
+   HUD / BANNER CONTAINERS
+   ========================================================= */
+
 .hudbanner {
   width: min(1100px, calc(100% - 32px));
   margin: 0 auto;
 
-  /* If your banner already has these styles, keep yours.
-     If not, these are reasonable defaults: */
-  background: #f3f6ff;
-  border: 1px solid #d7deef;
+  background: var(--surface);
+  border: 1px solid rgba(60, 50, 35, 0.14);
   border-radius: 14px;
   padding: 14px 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px rgba(30, 24, 16, 0.08);
 
   display: flex;
   align-items: center;
@@ -67,71 +135,174 @@ html, body, #root {
   gap: 16px;
 }
 
+/* flatter "paper" card style */
 .qp-card {
-  background: rgb(185, 201, 195);
-  padding: 26px 22px;
+  background: var(--surface);
+  border: 1px solid rgba(60, 50, 35, 0.18);
+  border-radius: 14px;
+  padding: 22px 20px;
   min-height: 485px;
-  width: 100%;
-  opacity: 75%;
+  width: min(1400px, calc(100% - 32px));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 10px 25px rgba(30, 24, 16, 0.08);
+  opacity: 1;
 }
 
-.page-center {
-  display: flex;          
-  justify-content: center;  /* center left/right */
-  align-items: center;   
-  min-height: 80vh; /*this line places the div in the center of the page. vh - viewport height, 100vh - element will be as tall as the screen*/
-}
+
+/* =========================================================
+   BUTTONS / INTERACTION
+   ========================================================= */
 
 .qp-button {
   padding: 0.65rem 1.25rem;
-  border-radius: 999px; /*makes button rounded*/
-  border-color: #ffffff;
-  background: #258beb;
+  border-radius: 999px;
+  border: 1px solid rgba(60, 50, 35, 0.18);
+  background: var(--accent);
   color: #ffffff;
-  font-weight: 600; /*makes font thicker */
+  font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
 }
 
-.draggable{
-    cursor: grab;
+.draggable {
+  cursor: grab;
 }
 
-.number-line {
-  display: flex; /* put boxes in a row */
-  justify-content: center; /* center them horizontally */
-  gap: 1.5rem; /* space between the boxes */
-  margin: 1.5rem 0; /* space above/below the row */
+
+/* =========================================================
+   SETUP PANEL (Category / Difficulty / Start)
+   ========================================================= */
+
+.setup-panel {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 18px;
+  background: rgba(255, 254, 250, 0.78); /* warm translucent surface */
+  border: 1px solid rgba(60, 50, 35, 0.14);
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(30, 24, 16, 0.06);
 }
 
-.questions-deck{
-  display: flex; /* put boxes in a row */
-  justify-content: right; /* center them horizontally */
-  gap: 1.5rem; /* space between the boxes */
-  margin: 1.5rem 0; /* space above/below the row */
+.setup-panel h2 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
 }
 
-.current-question{
+.setup-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.setup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+  flex: 1;
+}
+
+.setup-label {
+  font-size: 12px;
+  font-weight: 650;
+  color: rgba(26, 26, 26, 0.62);
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+.setup-input,
+.setup-select {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(60, 50, 35, 0.18);
+  background: #FAF7EF;           /* warm input background */
+  outline: none;
+  font-size: 14px;
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(30, 24, 16, 0.06);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.setup-input::placeholder {
+  color: rgba(26, 26, 26, 0.38);
+}
+
+.setup-select {
+  appearance: none;
+  padding-right: 36px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(26, 26, 26, 0.55) 50%),
+    linear-gradient(135deg, rgba(26, 26, 26, 0.55) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 18px,
+    calc(100% - 12px) 18px;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.setup-input:focus,
+.setup-select:focus {
+  border-color: rgba(43, 108, 176, 0.55);
+  box-shadow: 0 0 0 4px rgba(43, 108, 176, 0.12);
+  transform: none;
+}
+
+.setup-input:disabled,
+.setup-select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.setup-button {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(60, 50, 35, 0.18);
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(30, 24, 16, 0.10);
+  transition: box-shadow 140ms ease, opacity 140ms ease, filter 140ms ease;
+}
+
+.setup-button:hover {
+  box-shadow: 0 8px 16px rgba(30, 24, 16, 0.14);
+  filter: brightness(0.98);
+}
+
+.setup-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   CURRENT QUESTION CARD / DROP ZONE
+   ========================================================= */
+
+.current-question {
   margin: 1rem auto 2rem auto;
   padding: 1rem 1.5rem;
-  max-width: 500px;
+  max-width: 520px;
   text-align: left;
-  border-radius: 8px;
-  border: 3px solid #2563eb;  
-  background: #eff6ff;        
-  color: #1d4ed8;             
-  font-weight: 600;     
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); /* soft shadow */
-}
 
+  border-radius: 12px;
+  border: 1px solid rgba(60, 50, 35, 0.18);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
 
-.drop-zone{
-  text-align: center;
-  width: 300px;
-  height: 150px; 
-  border-radius: 10px;
-  border: 2px solid #2563eb; 
-  background: #eff6ff;  
+  box-shadow: 0 6px 16px rgba(30, 24, 16, 0.08);
 }
 
 .current-question-text {
@@ -142,48 +313,72 @@ html, body, #root {
 .current-question-hint {
   margin: 0;
   font-size: 0.85rem;
-  color: #4b5563;
+  color: var(--muted);
 }
 
-/* Number line container */
+.drop-zone {
+  text-align: center;
+  width: 300px;
+  height: 150px;
+  border-radius: 12px;
+  border: 1px dashed rgba(60, 50, 35, 0.22);
+  background: var(--surface);
+}
+
+
+/* =========================================================
+   NUMBER LINE / DECK / BOXES / DROP SLOTS
+   ========================================================= */
+
 .number-line {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: 1.25rem;
+  margin: 1.25rem 0;
 }
 
-/* 0, ininity and placed question boxes */
+.questions-deck {
+  display: flex;
+  justify-content: right;
+  gap: 1.25rem;
+  margin: 1.25rem 0;
+}
+
+/* 0, infinity and placed question boxes */
 .number-box {
   min-width: 80px;
   max-width: 160px;
   min-height: 140px;
   max-height: 140px;
   padding: 0.5rem;
-  border-radius: 8px;
-  border: 3px solid #2563eb;
-  background: #ffffff;
+  border-radius: 12px;
+
+  border: 1px solid rgba(60, 50, 35, 0.18);
+  background: #FBF8F0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: .9rem;
+
+  font-size: 0.9rem;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
-  color: #214bbd;
+  color: var(--text);
   font-weight: 600;
+
+  box-shadow: 0 6px 16px rgba(30, 24, 16, 0.08);
 }
 
 /* placed question boxes */
 .line-question-box {
-  background: #e0f2fe;
+  background: #F1F7FF;
 }
 
 /* boundaries */
 .boundary-box {
-  background: #f1f5f9;
-  font-weight: 500;
+  background: #F0ECE2;
+  font-weight: 600;
   font-size: 3rem;
+  color: var(--text);
 }
 
 /* droppable slots between boxes */
@@ -191,11 +386,38 @@ html, body, #root {
   width: 24px;
   height: 50px;
   border-radius: 12px;
-  border: 3px dashed transparent;
+  border: 2px dashed transparent;
 }
 
-/* when a droppable slot is being hovered over by a card*/
-.drop-slot--active { 
-  border-color: #22c55e;
-  background-color: rgba(34, 197, 94, 0.1);
+/* when a droppable slot is being hovered over by a card */
+.drop-slot--active {
+  border-color: var(--success);
+  background-color: rgba(47, 133, 90, 0.10);
+}
+
+
+/* =========================================================
+   RESPONSIVE (Laptop heights etc.)
+   ========================================================= */
+
+@media (max-height: 800px) {
+  .qp-card {
+    min-height: 360px;
+    padding: 18px 16px;
+  }
+
+  .number-box {
+    min-height: 120px;
+    max-height: 120px;
+    min-width: 70px;
+  }
+
+  .boundary-box {
+    font-size: 2.5rem;
+  }
+
+  .number-line {
+    margin: 0.9rem 0;
+    gap: 1rem;
+  }
 }

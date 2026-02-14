@@ -1,24 +1,29 @@
 .topbar {
-  background: #aac1cc;              /* different colour */
-  border-bottom: 1px solid #2b3446;  /* thin separating line */
+  background: #1B1F2A;              /* different colour */
+  border-bottom: 1px solid rgba(255,255,255,0.10);  /* thin separating line */
   top: 0;
 }
 
 .topbar__inner {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 12px 16px;
-  height: 80px;
+  padding-top: 12px;
+  height: 88px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .topbar__title {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #e7eefc;
+  color: #F2EEE4;
   letter-spacing: 0.2px;
 }
 
+.topbar-logo {
+  height: 320px;       
+  width: auto;
+  display: block;
+}
