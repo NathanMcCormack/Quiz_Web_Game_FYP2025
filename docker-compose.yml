@@ -29,7 +29,7 @@ services:
     depends_on:
       - db
     ports:
-      - "8001:8001"
+      - "8002:8001"
 
   user_service:
     build:
