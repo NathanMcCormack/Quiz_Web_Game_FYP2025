@@ -5,8 +5,8 @@ import GameOverPopUp from "./GameOverPopUp";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 //imports from dnd website 
 import { DndContext, closestCenter, useDraggable, useDroppable } from "@dnd-kit/core";
-import TopBar from "./components/TopBar";
-import FooterBar from "./components/FooterBar";
+import TopBar from "./components/layout/TopBar";
+import FooterBar from "./components/layout/FooterBar";
 
 function QuestionPlacement() {
   // The question currently being placed
