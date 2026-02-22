@@ -1,5 +1,5 @@
 import React from "react";
-import "./GameOverPopUp.css";
+import "../styles/GameOverPopUp.css";
 
 export default function GameOverPopUp({ open, score, onStartNewGame, title, subtitle }) { //open - visbalility
 

@@ -1,5 +1,5 @@
 import React from "react";
-import QuestionPlacement from "./QuestionPlacement";
+import QuestionPlacement from "./features/game/QuestionPlacement.jsx";
 
 function App() {
   return <QuestionPlacement />;
