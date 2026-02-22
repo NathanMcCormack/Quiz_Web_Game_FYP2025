@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ranger_postgres
+    env_file:
+      - .env
+    environment:
+      # Postgres reads these at first init
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # This is the default DB created; we'll create the others in init.sql
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      # Bind to localhost only (safer). Remove 127.0.0.1 if you really need remote DB access.
+      - "127.0.0.1:5432:5432"
+
+  game_service:
+    build:
+      context: .
+      dockerfile: Game_Service/Dockerfile
+    container_name: ranger_game_service
+    env_file:
+      - .env
+    environment:
+      GAME_DATABASE_URL: ${GAME_DATABASE_URL}
+    depends_on:
+      - db
+    ports:
+      - "8001:8001"
+
+  user_service:
+    build:
+      context: .
+      dockerfile: User_Service/Dockerfile
+    container_name: ranger_user_service
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      - db
+    ports:
+      # Not public. Localhost only.
+      - "127.0.0.1:8000:8000"
+
+volumes:
+  pgdata:
