@@ -180,41 +180,49 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
       <TopBar /> 
       <div className="page-center"> {/* Centering wrapper */}
         <div className="qp-card">
-        <div className="setup-panel">
-          <h2>Start a new game</h2>
-          <label>
-            Category:
-            <input
-              type="text"
-              value={categoryInput}
-              onChange={(e) => setCategoryInput(e.target.value)}
-              placeholder="eg Premier League, 90s Music..."
-              disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
-            />
-          </label>
-          <label>
-            Difficulty:
-            <select
-              value={difficultyInput}
-              onChange={(e) => setDifficultyInput(e.target.value)}
-              disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
-            >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
-          </label>
+          <div className="setup-panel">
+            <h2>Start a new game</h2>
 
-          <button onClick={handleStartGame} disabled={isValidating}>
-            Start Game
-          </button>
-          {sessionId && <p>Session: {sessionId}</p>}
-          {message && (
-            <p>
-              <strong>Message:</strong> {message}
-            </p>
-          )}
-        </div>
+            <div className="setup-row">
+              <div className="setup-field">
+                <div className="setup-label">Category</div>
+                <input
+                  className="setup-input"
+                  type="text"
+                  value={categoryInput}
+                  onChange={(e) => setCategoryInput(e.target.value)}
+                  placeholder="eg Premier League, 90s Music..."
+                  disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
+                />
+              </div>
+
+              <div className="setup-field">
+                <div className="setup-label">Difficulty</div>
+                <select
+                  className="setup-select"
+                  value={difficultyInput}
+                  onChange={(e) => setDifficultyInput(e.target.value)}
+                  disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+
+              <button onClick={handleStartGame} disabled={isValidating}>
+                Start Game
+              </button>
+            </div>
+
+            {sessionId && <p>Session: {sessionId}</p>}
+
+            {message && (
+              <p>
+                <strong>Message:</strong> {message}
+              </p>
+            )}
+          </div>
         <div className="number-line">
           <CurrentQuestionCard question={currentQuestion} isDisabled={isValidating} />
           <strong>Score:</strong> {score}
