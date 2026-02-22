@@ -5,7 +5,8 @@ import GameOverPopUp from "./GameOverPopUp";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 //imports from dnd website 
 import { DndContext, closestCenter, useDraggable, useDroppable } from "@dnd-kit/core";
-
+import TopBar from "./components/TopBar";
+import FooterBar from "./components/FooterBar";
 
 function QuestionPlacement() {
   // The question currently being placed
@@ -230,75 +231,93 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
 
 //What will show up on the webpage - everything inside div.
   return (
-     <DndContext onDragEnd={handleDragEnd}>
+    <DndContext onDragEnd={handleDragEnd}>
       <GameOverPopUp open={isGameOver} score={lastScore} onStartNewGame={startNewGame} title={endTitle} subtitle={endSubtitle}/>
-      <div className="page-center">
-        <div className="qp-card">
-          <h1>Question Placement Testing</h1>
+      <div className="qp-shell">
+        <TopBar title="Quiz Game"/>
 
-          <div className="setup-panel">
-            <h2>Start a new game</h2>
+        <div className="qp-middle">
+          <div className="qp-middle-inner">
+            <div className="setup-panel">
+              <h2>Start a new game</h2>
 
-            <label>
-              Category:
-              <input
-                type="text"
-                value={categoryInput} //the players input will always display in the current React state
-                onChange={(e) => setCategoryInput(e.target.value)} //updates teh state whenever the user types in, typing then triggers teh setCategoryInput, and the value updates 
-                placeholder="eg Premier League, 90s Music..."
-                disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0} //the category input becomes disbaled when: backend check in porgress, a gamne is in progress, there are any questions placed
-              />
-            </label>
+              <div className="setup-row">
+                <label className="setup-field">
+                  <span className="setup-label">Category</span>
+                  <input
+                    className="setup-input"
+                    type="text"
+                    value={categoryInput} //the players input will always display in the current React state
+                    onChange={(e) => setCategoryInput(e.target.value)} //updates teh state whenever the user types in, typing then triggers teh setCategoryInput, and the value updates 
+                    placeholder="eg Premier League, 90s Music..."
+                    disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0} //the category input becomes disbaled when: backend check in porgress, a gamne is in progress, there are any questions placed
+                  />
+                </label>
 
-            <label>
-              Difficulty:
-              <select
-                value={difficultyInput}
-                onChange={(e) => setDifficultyInput(e.target.value)}
-                disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
-              >
-                <option value="easy">easy</option>
-                <option value="medium">medium</option>
-                <option value="hard">hard</option>
-              </select>
-            </label>
+                <label className="setup-field">
+                  <span className="setup-label">Difficulty</span>
+                  <select
+                    className="setup-select"
+                    value={difficultyInput}
+                    onChange={(e) => setDifficultyInput(e.target.value)}
+                    disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
+                  >
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </label>
 
-            <button onClick={handleStartGame} disabled={isValidating}>
-              Start Game
-            </button>
+                <button className="setup-button" onClick={handleStartGame} disabled={isValidating}>
+                  Start Game
+                </button>
+              </div>
 
-            {sessionId && (
-              <p style={{ fontSize: "12px", opacity: 0.7 }}>
-                Session: {sessionId}
+              {sessionId && (
+                <p>
+                  Session: {sessionId}
+                </p>
+              )}
+            </div>
+
+            {message && (
+              <p>
+                <strong>Message:</strong> {message} 
               </p>
             )}
           </div>
-
-          <div className="number-line">
-            <CurrentQuestionCard question={currentQuestion} isDisabled={isValidating} />
-            <strong>Score:</strong> {score}
-          </div>
-
-          {message && (
-            <p>
-              <strong>Message:</strong> {message} 
-            </p>
-          )}
-
-          <p>
-            <strong>Positions array:</strong>
-          </p>
-          <div className="number-line"> 
-          <div className="number-box boundary-box">0</div>
-          <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
-          <div className="number-box boundary-box">   {/* Right boundary: infinity*/}
-            <FaInfinity />
-          </div>
         </div>
+
+        <div className="qp-bottom">
+          <div className="qp-hud-wrap">
+            <div className="page-center">
+              <div className="qp-card">
+
+                <div className="number-line">
+                  <CurrentQuestionCard question={currentQuestion} isDisabled={isValidating} />
+                  <strong>Score:</strong> {score}
+                </div>
+
+                <p>
+                </p>
+
+                <div className="number-line"> 
+                  <div className="number-box boundary-box">0</div>
+                  <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
+                  <div className="number-box boundary-box">   {/* Right boundary: infinity*/}
+                    <FaInfinity />
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      <FooterBar />
     </DndContext>
   );
+
 }
 
 export default QuestionPlacement;
