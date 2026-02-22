@@ -1,5 +1,5 @@
 import "./TopBar.css";
-import logo from "../assets/GameLogo.png";
+import logo from "../../assets/GameLogo.png";
 
 export default function TopBar({title}) {
   return (
