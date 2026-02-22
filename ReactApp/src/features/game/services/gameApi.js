@@ -1,17 +1,9 @@
-//Axio sends HTTP reuqests to a server (FastAPI/uvicorn) and receives data back from it 
-//axios client side -> client sends requests 
-//uvicorn server side -> waits and handles incoming requests
 import axios from "axios";
-const API_BASE_URL = "/api"; //Allows to easily change the URL in the future if needed
+const API_BASE_URL = "/api";
 
-export async function fetchRandomQuestion() {
-  const res = await axios.get(`${API_BASE_URL}/questions/random`);  //in main -> @app.get("/api/questions/random", response_model=QuestionReadPublic), stores response in "res"
-  return res.data; // { id, question, category, difficulty } **doesnt show the answer**
-}
-
-export async function fetchQuestionById(id) {
-  const res = await axios.get(`${API_BASE_URL}/questions/${id}`);
-  return res.data; // { id, question, answer, ... }
+export async function startGame({ category, difficulty }) {
+  const res = await axios.post(`${API_BASE_URL}/game/start`, { category, difficulty });
+  return res.data;
 }
 
 export async function validatePlacement({ placedQuestionId, leftNeighborId, rightNeighborId }) {
@@ -24,18 +16,10 @@ export async function validatePlacement({ placedQuestionId, leftNeighborId, righ
       right_neighbor_id: rightNeighborId ?? null,
     }),
   });
-  
+
   if (!res.ok) {
-  const text = await res.text();
-  throw new Error(`validatePlacement failed: ${res.status} ${text}`);
+    const text = await res.text();
+    throw new Error(`validatePlacement failed: ${res.status} ${text}`);
   }
   return res.json();
-}
-
-export async function startGame({ category, difficulty }) {
-  const res = await axios.post(`${API_BASE_URL}/game/start`, {
-    category,
-    difficulty,
-  });
-  return res.data; // { session_id, questions: [...] }
 }

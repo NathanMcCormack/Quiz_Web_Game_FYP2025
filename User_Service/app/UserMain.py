@@ -2,6 +2,8 @@ from fastapi import FastAPI, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session 
 from sqlalchemy import select 
 from sqlalchemy.exc import IntegrityError 
+from contextlib import asynccontextmanager
+import time
  
 from .UserDatabase import engine, SessionLocal 
 from .UserModels import Base, UserDB 
@@ -9,10 +11,24 @@ from .UserSchemas import UserCreate, UserRead
 
 @asynccontextmanager 
 async def lifespan(app: FastAPI): 
-    Base.metadata.create_all(bind=engine)    
+    #wait for Postgres to be ready (important in Docker), then create tables
+    max_tries = 15
+    delay_seconds = 1
+
+    for attempt in range(1, max_tries + 1):
+        try:
+            with engine.connect() as _conn:
+                pass
+            Base.metadata.create_all(bind=engine)    
+            break
+        except Exception:
+            if attempt == max_tries:
+                raise
+            time.sleep(delay_seconds)
+
     yield 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/health")
 def get_users():
