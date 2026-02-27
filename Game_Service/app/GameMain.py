@@ -4,6 +4,14 @@ from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
+from pathlib import Path
+from dotenv import load_dotenv
+from contextlib import asynccontextmanager
+import time
+
+ENV_PATH = Path(__file__).resolve().parents[1] / ".env"   # Game_Service/.env
+load_dotenv(ENV_PATH)
+
 from .GameDatabase import engine, SessionLocal
 from .GameModels import Base, QuestionDB, GameRunDB
 from .GameSchemas import (
@@ -19,20 +27,35 @@ from .GameSchemas import (
     ValidatePlacementRequest,
     ValidatePlacementResponse,
 )
-from pathlib import Path
-from dotenv import load_dotenv
-
-ENV_PATH = Path(__file__).resolve().parents[1] / ".env"   # Game_Service/.env
-load_dotenv(ENV_PATH)
 
 import uuid #generates univerally unique identifiers 
 from .QuestionGenerator import generate_questions
 from .GameSchemas import GameStartRequest, GameStartResponse
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    #wait for Postgres to be ready (important in Docker), then create tables
+    max_tries = 15
+    delay_seconds = 1
+
+    for attempt in range(1, max_tries + 1):
+        try:
+            with engine.connect() as _conn:
+                pass
+            #looks at all tables made from Base and rceates them
+            Base.metadata.create_all(bind=engine)
+            break
+        except Exception:
+            if attempt == max_tries:
+                raise
+            time.sleep(delay_seconds)
+
+    yield
+
+
 #creates a fastapi object called app - what we you for endpoints. @app.get/post/put/patch/delete. Also used for running the server - uvicorn main:app
-app = FastAPI()
-#looks at all tables made from Base and rceates them
-Base.metadata.create_all(bind=engine)
+app = FastAPI(lifespan=lifespan)
 
 origins = ["*"]
 
@@ -151,7 +174,7 @@ def start_game(payload: GameStartRequest, db: Session = Depends(get_db)):
         generated = generate_questions(
             category=payload.category,
             difficulty=payload.difficulty,
-            count=20,
+            count=8,
         )
     except Exception as e:
         # log full error server-side
@@ -271,6 +294,3 @@ def get_leaderboard(db: Session = Depends(get_db)):
         {"user_id": r.user_id, "best_score": r.best_score, "best_streak": r.best_streak}
         for r in rows #returns multiple users with thei rallocated stats
     ]
-
-
-
