@@ -15,14 +15,14 @@ export async function fetchTodayDaily() {
   return res.json();
 }
 
-export async function validateDailyPlacement({ placedId, leftId, rightId }) {
+export async function validateDailyPlacement({placedQuestionId,leftNeighborId,rightNeighborId,}) {
   const res = await fetch("/api/daily/validate-placement", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      placed_question_id: placedId,
-      left_neighbor_id: leftId ?? null,
-      right_neighbor_id: rightId ?? null,
+      placed_question_id: placedQuestionId,
+      left_neighbor_id: leftNeighborId ?? null,
+      right_neighbor_id: rightNeighborId ?? null,
     }),
   });
 

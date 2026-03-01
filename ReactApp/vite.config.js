@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:8002", // Docker/Postgres backend
+        target: "http://localhost:8001", // Docker/Postgres backend
         changeOrigin: true,
       },
     },
