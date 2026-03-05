@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 from typing import Optional
 from .GameDatabase import SessionLocal
 from .GameModels import DailyChallengeDB, DailyQuestionDB, DailyCategoryDB
-from .GameSchemas import DailyChallengePublic, DailyQuestionPublic, DailyValidatePlacementRequest, DailyValidatePlacementResponse
+from .GameSchemas import DailyChallengePublic, DailyQuestionPublic, DailyValidatePlacementRequest, DailyValidatePlacementResponse, DailyCategoryRead, DailyCategoryCreate
 from .QuestionGenerator import generate_questions
 
 router = APIRouter(prefix="/api/daily", tags=["daily"])
@@ -182,3 +182,21 @@ def validate_daily(payload: DailyValidatePlacementRequest, db: Session = Depends
         left_answer=left_answer,
         right_answer=right_answer,
     )
+
+@router.get("/categories", response_model=list[DailyCategoryRead])
+def list_daily_categories(db: Session = Depends(get_db)):
+    cats = db.execute(select(DailyCategoryDB).order_by(DailyCategoryDB.id)).scalars().all()
+    return cats
+
+
+@router.post("/categories", status_code=status.HTTP_201_CREATED, response_model=DailyCategoryRead)
+def create_daily_category(payload: DailyCategoryCreate, db: Session = Depends(get_db)):
+    cat = DailyCategoryDB(name=payload.name, is_used=False, used_at=None)
+    db.add(cat)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Daily category already exists")
+    db.refresh(cat)
+    return cat

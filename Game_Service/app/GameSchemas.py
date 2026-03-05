@@ -108,3 +108,14 @@ class DailyValidatePlacementResponse(BaseModel):
     placed_answer: AnswerInt
     left_answer: Optional[AnswerInt] = None
     right_answer: Optional[AnswerInt] = None
+
+#------------- Daily Categories ---------------
+class DailyCategoryCreate(BaseModel):
+    name: CategoryStr
+
+class DailyCategoryRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    name: CategoryStr
+    is_used: bool
+    used_at: Optional[date] = None
