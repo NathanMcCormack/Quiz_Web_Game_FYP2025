@@ -70,17 +70,34 @@ def pick_unused_category(db: Session) -> str:
 
 # -------- Daily Mode Endpoints --------
 
-@router.post("/generate-today", status_code=status.HTTP_201_CREATED)
-def generate_today(db: Session = Depends(get_db)):
+@router.post("/generate-today")
+def generate_today(db: Session = Depends(get_db), _auth: None = Depends(verify_daily_job_token),):
     """
-    Creates today's daily challenge ONCE.
-    Returns 409 if it already exists.
+    Creates today's daily challenge once, using the UTC date.
+    If it already exists and succeeded, return a non-error response.
     """
     today = get_utc_today()
+
+    existing = db.execute(
+        select(DailyChallengeDB).where(DailyChallengeDB.challenge_date == today)
+    ).scalars().first()
+
+    if existing:
+        if existing.status == "success":
+            return {
+                "status": "already_exists",
+                "date": str(today),
+                "category": existing.category,
+                "difficulty": existing.difficulty,
+            }
+        raise HTTPException(
+            status_code=409,
+            detail="Daily challenge already exists for today but is not in success state"
+        )
+
     difficulty = difficulty_for_date(today)
     category = pick_unused_category(db)
 
-    #create challenge row first (UNIQUE date prevents duplicates)
     challenge = DailyChallengeDB(
         challenge_date=today,
         category=category,
@@ -97,7 +114,6 @@ def generate_today(db: Session = Depends(get_db)):
 
     db.refresh(challenge)
 
-    #generate 8 questions
     try:
         generated = generate_questions(category=category, difficulty=difficulty, count=8)
     except Exception as e:
@@ -107,19 +123,26 @@ def generate_today(db: Session = Depends(get_db)):
         raise HTTPException(status_code=502, detail=f"Failed to generate questions: {str(e)}")
 
     for q in generated:
-        db.add(DailyQuestionDB(
-            daily_challenge_id=challenge.id,
-            question=q.question,
-            answer=q.answer,
-            category=q.category,
-            difficulty=q.difficulty,
-        ))
+        db.add(
+            DailyQuestionDB(
+                daily_challenge_id=challenge.id,
+                question=q.question,
+                answer=q.answer,
+                category=q.category,
+                difficulty=q.difficulty,
+            )
+        )
 
     challenge.status = "success"
     challenge.error_message = None
     db.commit()
 
-    return {"status": "created", "date": str(today), "category": category, "difficulty": difficulty}
+    return {
+        "status": "created",
+        "date": str(today),
+        "category": category,
+        "difficulty": difficulty,
+    }
 
 @router.get("/today", response_model=DailyChallengePublic)
 def get_today(db: Session = Depends(get_db)):
@@ -197,3 +220,13 @@ def create_daily_category(payload: DailyCategoryCreate, db: Session = Depends(ge
         raise HTTPException(status_code=409, detail="Daily category already exists")
     db.refresh(cat)
     return cat
+
+
+#-------------------- Verify daily Token ------------------
+def verify_daily_job_token(x_daily_job_token: str = Header(default="")):
+    expected = os.getenv("DAILY_JOB_TOKEN")
+    if not expected:
+        raise HTTPException(status_code=500, detail="DAILY_JOB_TOKEN is not configured")
+
+    if not secrets.compare_digest(x_daily_job_token, expected):
+        raise HTTPException(status_code=401, detail="Unauthorized")
