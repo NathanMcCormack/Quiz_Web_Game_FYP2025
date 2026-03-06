@@ -6,6 +6,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+import os
+
+os.environ["DAILY_JOB_TOKEN"] = "test-token"
 
 # Ensure Game_Service/ is on sys.path so `import app...` always works under pytest
 BASE_DIR = Path(__file__).resolve().parents[1]  # .../Game_Service
