@@ -1,6 +1,3 @@
-from app.GameModels import DailyChallengeDB, DailyQuestionDB, DailyCategoryDB
-
-
 def test_get_daily_today_404_when_missing(client):
     r = client.get("/api/daily/today")
     assert r.status_code == 404
@@ -25,10 +22,7 @@ def test_generate_today_creates_challenge_and_questions(client, monkeypatch):
             for i in range(count)
         ]
 
-    monkeypatch.setattr(
-        "app.DailyMode.generate_questions",
-        fake_generate_questions
-    )
+    monkeypatch.setattr("app.DailyMode.generate_questions", fake_generate_questions)
 
     headers = {"X-Daily-Job-Token": "test-token"}
 
@@ -64,10 +58,7 @@ def test_generate_today_is_idempotent(client, monkeypatch):
             for i in range(count)
         ]
 
-    monkeypatch.setattr(
-        "app.DailyMode.generate_questions",
-        fake_generate_questions
-    )
+    monkeypatch.setattr("app.DailyMode.generate_questions", fake_generate_questions)
 
     headers = {"X-Daily-Job-Token": "test-token"}
 
@@ -84,10 +75,7 @@ def test_generate_today_marks_failed_on_generator_error(client, monkeypatch):
     def fake_generate_questions(*, category, difficulty, count):
         raise RuntimeError("OpenAI generation failed")
 
-    monkeypatch.setattr(
-        "app.DailyMode.generate_questions",
-        fake_generate_questions
-    )
+    monkeypatch.setattr("app.DailyMode.generate_questions", fake_generate_questions)
 
     headers = {"X-Daily-Job-Token": "test-token"}
 
