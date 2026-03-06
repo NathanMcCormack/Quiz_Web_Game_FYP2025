@@ -1,21 +1,18 @@
 # Game_Service/app/DailyMode.py
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from datetime import date, datetime
-from zoneinfo import ZoneInfo
+from datetime import date, datetime, timezone
 from typing import Optional
 from .GameDatabase import SessionLocal
 from .GameModels import DailyChallengeDB, DailyQuestionDB, DailyCategoryDB
 from .GameSchemas import DailyChallengePublic, DailyQuestionPublic, DailyValidatePlacementRequest, DailyValidatePlacementResponse, DailyCategoryRead, DailyCategoryCreate
 from .QuestionGenerator import generate_questions
+import os
+import secrets
 
 router = APIRouter(prefix="/api/daily", tags=["daily"])
-
-
-#generate "today" based on Ireland local date (Europe/Dublin), not UTC
-IRELAND_TZ = ZoneInfo("Europe/Dublin")
 
 def get_db():
     db = SessionLocal()
@@ -24,8 +21,8 @@ def get_db():
     finally:
         db.close()
 
-def get_ireland_today() -> date:
-    return datetime.now(IRELAND_TZ).date()
+def get_utc_today() -> date:
+    return datetime.now(timezone.utc).date()
 
 def difficulty_for_date(d: date) -> str:
     cycle = ["easy", "medium", "hard"]
@@ -46,7 +43,7 @@ def pick_unused_category(db: Session) -> str:
     cat = db.execute(
         select(DailyCategoryDB)
         .where(DailyCategoryDB.is_used == False)
-        .order_by(DailyCategoryDB.id)
+        .order_by(func.random())
     ).scalars().first()
 
     if not cat:
@@ -60,14 +57,14 @@ def pick_unused_category(db: Session) -> str:
         cat = db.execute(
             select(DailyCategoryDB)
             .where(DailyCategoryDB.is_used == False)
-            .order_by(DailyCategoryDB.id)
+            .order_by(func.random())
         ).scalars().first()
 
     if not cat:
         raise HTTPException(status_code=500, detail="No categories available")
 
     cat.is_used = True
-    cat.used_at = get_ireland_today()
+    cat.used_at = get_utc_today()
     db.commit()
     return cat.name
 
@@ -79,7 +76,7 @@ def generate_today(db: Session = Depends(get_db)):
     Creates today's daily challenge ONCE.
     Returns 409 if it already exists.
     """
-    today = get_ireland_today()
+    today = get_utc_today()
     difficulty = difficulty_for_date(today)
     category = pick_unused_category(db)
 
@@ -126,7 +123,7 @@ def generate_today(db: Session = Depends(get_db)):
 
 @router.get("/today", response_model=DailyChallengePublic)
 def get_today(db: Session = Depends(get_db)):
-    today = get_ireland_today()
+    today = get_utc_today()
 
     challenge = db.execute(
         select(DailyChallengeDB).where(DailyChallengeDB.challenge_date == today)
