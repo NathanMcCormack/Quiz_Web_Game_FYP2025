@@ -16,4 +16,4 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
     - name: Tests (pytest + coverage)
-      run: pytest Game_Service/tests User_Service/tests --cov=Game_Service/app --cov=User_Service/app --cov-report=term-missing
+      run: pytest Game_Service/tests User_Service/tests --cov=Game_Service/app --cov-report=term-missing
