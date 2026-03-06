@@ -10,3 +10,5 @@ flake8>=6,<8                  # Linter / code style checks (like Checkstyle/PMD)
 psycopg2-binary>=2.9,<3       # PostgreSQL driver (like MySQL Connector/J)
 python-dotenv>=1,<2           # Environment variable loader (.env)
 openai>=1,<2
+pytest
+pytest-cov
