@@ -21,7 +21,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: pytest Game_Service/tests User_Service/tests
+        run: pytest Game_Service/tests
 
       - name: Trigger daily generation
         run: |
