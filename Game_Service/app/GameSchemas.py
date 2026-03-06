@@ -1,6 +1,7 @@
 from typing import Optional, Annotated, Literal
 from pydantic import BaseModel, ConfigDict, StringConstraints
 from annotated_types import Ge
+from datetime import date
 
 CategoryStr = Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9][A-Za-z0-9 &'\\-]{0,63}$", min_length=1, max_length=64)] #1 oe 2 words that only contain alphabetical characters 
 QuestionStr = Annotated[str, StringConstraints(min_length=1, max_length=500)]
@@ -80,3 +81,41 @@ class GameStartRequest(BaseModel):
 class GameStartResponse(BaseModel):
     session_id: str
     questions: list[QuestionReadPublic]
+
+#------------- Daily Challenge ---------------
+from datetime import date
+
+class DailyQuestionPublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    question: QuestionStr
+    category: CategoryStr
+    difficulty: Difficulty
+
+class DailyChallengePublic(BaseModel):
+    challenge_date: date
+    category: CategoryStr
+    difficulty: Difficulty
+    questions: list[DailyQuestionPublic]
+
+class DailyValidatePlacementRequest(BaseModel):
+    placed_question_id: int
+    left_neighbor_id: Optional[int] = None
+    right_neighbor_id: Optional[int] = None
+
+class DailyValidatePlacementResponse(BaseModel):
+    correct: bool
+    placed_answer: AnswerInt
+    left_answer: Optional[AnswerInt] = None
+    right_answer: Optional[AnswerInt] = None
+
+#------------- Daily Categories ---------------
+class DailyCategoryCreate(BaseModel):
+    name: CategoryStr
+
+class DailyCategoryRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    name: CategoryStr
+    is_used: bool
+    used_at: Optional[date] = None

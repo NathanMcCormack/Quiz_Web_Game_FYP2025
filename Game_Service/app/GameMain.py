@@ -8,6 +8,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 import time
+from .DailyMode import router as daily_router
 
 ENV_PATH = Path(__file__).resolve().parents[1] / ".env"   # Game_Service/.env
 load_dotenv(ENV_PATH)
@@ -56,6 +57,7 @@ async def lifespan(app: FastAPI):
 
 #creates a fastapi object called app - what we you for endpoints. @app.get/post/put/patch/delete. Also used for running the server - uvicorn main:app
 app = FastAPI(lifespan=lifespan)
+app.include_router(daily_router)
 
 origins = ["*"]
 

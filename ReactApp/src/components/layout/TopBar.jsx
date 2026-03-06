@@ -5,7 +5,7 @@ export default function TopBar({title}) {
   return (
     <header className="topbar">
       <div className="topbar__inner">
-        <img className="topbar-logo" src={logo}/>
+        {/* <img className="topbar-logo" src={logo}/> */}
       </div>
     </header>
   );
