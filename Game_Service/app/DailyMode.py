@@ -1,18 +1,25 @@
 # Game_Service/app/DailyMode.py
 from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from datetime import date, datetime, timezone
-from typing import Optional
 from .GameDatabase import SessionLocal
 from .GameModels import DailyChallengeDB, DailyQuestionDB, DailyCategoryDB
-from .GameSchemas import DailyChallengePublic, DailyQuestionPublic, DailyValidatePlacementRequest, DailyValidatePlacementResponse, DailyCategoryRead, DailyCategoryCreate
+from .GameSchemas import (
+    DailyChallengePublic,
+    DailyQuestionPublic,
+    DailyValidatePlacementRequest,
+    DailyValidatePlacementResponse,
+    DailyCategoryRead,
+    DailyCategoryCreate,
+)
 from .QuestionGenerator import generate_questions
 import os
 import secrets
 
 router = APIRouter(prefix="/api/daily", tags=["daily"])
+
 
 def get_db():
     db = SessionLocal()
@@ -21,21 +28,44 @@ def get_db():
     finally:
         db.close()
 
+
 def get_utc_today() -> date:
     return datetime.now(timezone.utc).date()
+
 
 def difficulty_for_date(d: date) -> str:
     cycle = ["easy", "medium", "hard"]
     return cycle[d.toordinal() % 3]
 
+
+def verify_daily_job_token(x_daily_job_token: str = Header(default="")):
+    expected = os.getenv("DAILY_JOB_TOKEN")
+    if not expected:
+        raise HTTPException(status_code=500, detail="DAILY_JOB_TOKEN is not configured")
+
+    if not secrets.compare_digest(x_daily_job_token, expected):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+
 def ensure_categories_seeded(db: Session):
     existing = db.execute(select(DailyCategoryDB)).scalars().first()
     if existing:
         return
-    defaults = ["History", "Space", "Movies", "Football", "Music", "Science", "Geography", "Technology"]
+
+    defaults = [
+        "History",
+        "Space",
+        "Movies",
+        "Football",
+        "Music",
+        "Science",
+        "Geography",
+        "Technology",
+    ]
     for name in defaults:
         db.add(DailyCategoryDB(name=name))
     db.commit()
+
 
 def pick_unused_category(db: Session) -> str:
     ensure_categories_seeded(db)
@@ -47,7 +77,7 @@ def pick_unused_category(db: Session) -> str:
     ).scalars().first()
 
     if not cat:
-        # reset if exhausted
+        # Reset if all categories have been used
         cats = db.execute(select(DailyCategoryDB)).scalars().all()
         for c in cats:
             c.is_used = False
@@ -68,10 +98,14 @@ def pick_unused_category(db: Session) -> str:
     db.commit()
     return cat.name
 
+
 # -------- Daily Mode Endpoints --------
 
 @router.post("/generate-today")
-def generate_today(db: Session = Depends(get_db), _auth: None = Depends(verify_daily_job_token),):
+def generate_today(
+    db: Session = Depends(get_db),
+    _auth: None = Depends(verify_daily_job_token),
+):
     """
     Creates today's daily challenge once, using the UTC date.
     If it already exists and succeeded, return a non-error response.
@@ -92,7 +126,7 @@ def generate_today(db: Session = Depends(get_db), _auth: None = Depends(verify_d
             }
         raise HTTPException(
             status_code=409,
-            detail="Daily challenge already exists for today but is not in success state"
+            detail="Daily challenge already exists for today but is not in success state",
         )
 
     difficulty = difficulty_for_date(today)
@@ -144,6 +178,7 @@ def generate_today(db: Session = Depends(get_db), _auth: None = Depends(verify_d
         "difficulty": difficulty,
     }
 
+
 @router.get("/today", response_model=DailyChallengePublic)
 def get_today(db: Session = Depends(get_db)):
     today = get_utc_today()
@@ -156,10 +191,12 @@ def get_today(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Daily challenge not available yet")
 
     questions = db.execute(
-        select(DailyQuestionDB).where(DailyQuestionDB.daily_challenge_id == challenge.id).order_by(DailyQuestionDB.id)
+        select(DailyQuestionDB)
+        .where(DailyQuestionDB.daily_challenge_id == challenge.id)
+        .order_by(DailyQuestionDB.id)
     ).scalars().all()
 
-    #convert to public (NO answer field)
+    # Convert to public schema (NO answer field)
     public_questions = [DailyQuestionPublic.model_validate(q) for q in questions]
 
     return DailyChallengePublic(
@@ -168,6 +205,7 @@ def get_today(db: Session = Depends(get_db)):
         difficulty=challenge.difficulty,
         questions=public_questions,
     )
+
 
 @router.post("/validate-placement", response_model=DailyValidatePlacementResponse)
 def validate_daily(payload: DailyValidatePlacementRequest, db: Session = Depends(get_db)):
@@ -203,6 +241,7 @@ def validate_daily(payload: DailyValidatePlacementRequest, db: Session = Depends
         right_answer=right_answer,
     )
 
+
 @router.get("/categories", response_model=list[DailyCategoryRead])
 def list_daily_categories(db: Session = Depends(get_db)):
     cats = db.execute(select(DailyCategoryDB).order_by(DailyCategoryDB.id)).scalars().all()
@@ -220,13 +259,3 @@ def create_daily_category(payload: DailyCategoryCreate, db: Session = Depends(ge
         raise HTTPException(status_code=409, detail="Daily category already exists")
     db.refresh(cat)
     return cat
-
-
-#-------------------- Verify daily Token ------------------
-def verify_daily_job_token(x_daily_job_token: str = Header(default="")):
-    expected = os.getenv("DAILY_JOB_TOKEN")
-    if not expected:
-        raise HTTPException(status_code=500, detail="DAILY_JOB_TOKEN is not configured")
-
-    if not secrets.compare_digest(x_daily_job_token, expected):
-        raise HTTPException(status_code=401, detail="Unauthorized")

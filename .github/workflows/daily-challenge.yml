@@ -1,0 +1,36 @@
+name: Daily Challenge Generator
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  generate-daily:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest Game_Service/tests User_Service/tests
+
+      - name: Trigger daily generation
+        run: |
+          curl -X POST "${{ secrets.DAILY_TRIGGER_URL }}" \
+          -H "X-Daily-Job-Token: ${{ secrets.DAILY_JOB_TOKEN }}"
+
+      - name: Notify Admin if generation failed
+        if: failure()
+        run: |
+          curl -X POST "${{ secrets.FORMSPREE_ENDPOINT }}" \
+          -H "Content-Type: application/json" \
+          -d '{"message":"Daily challenge generation failed"}'
