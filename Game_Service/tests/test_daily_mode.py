@@ -1,8 +1,10 @@
-from Game_Service.app.GameModels import DailyChallengeDB, DailyQuestionDB, DailyCategoryDB
+from app.GameModels import DailyChallengeDB, DailyQuestionDB, DailyCategoryDB
+
 
 def test_get_daily_today_404_when_missing(client):
     r = client.get("/api/daily/today")
     assert r.status_code == 404
+
 
 def test_generate_today_creates_challenge_and_questions(client, monkeypatch):
     class FakeQuestion:
@@ -24,7 +26,7 @@ def test_generate_today_creates_challenge_and_questions(client, monkeypatch):
         ]
 
     monkeypatch.setattr(
-        "Game_Service.app.DailyMode.generate_questions",
+        "app.DailyMode.generate_questions",
         fake_generate_questions
     )
 
@@ -41,6 +43,7 @@ def test_generate_today_creates_challenge_and_questions(client, monkeypatch):
 
     assert len(daily["questions"]) == 8
     assert "answer" not in daily["questions"][0]
+
 
 def test_generate_today_is_idempotent(client, monkeypatch):
     class FakeQuestion:
@@ -62,7 +65,7 @@ def test_generate_today_is_idempotent(client, monkeypatch):
         ]
 
     monkeypatch.setattr(
-        "Game_Service.app.DailyMode.generate_questions",
+        "app.DailyMode.generate_questions",
         fake_generate_questions
     )
 
@@ -76,12 +79,13 @@ def test_generate_today_is_idempotent(client, monkeypatch):
     assert r2.status_code == 200
     assert r2.json()["status"] == "already_exists"
 
+
 def test_generate_today_marks_failed_on_generator_error(client, monkeypatch):
     def fake_generate_questions(*, category, difficulty, count):
         raise RuntimeError("OpenAI generation failed")
 
     monkeypatch.setattr(
-        "Game_Service.app.DailyMode.generate_questions",
+        "app.DailyMode.generate_questions",
         fake_generate_questions
     )
 
