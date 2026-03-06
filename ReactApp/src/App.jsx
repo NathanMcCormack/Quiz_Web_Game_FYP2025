@@ -1,8 +1,11 @@
 import React from "react";
-import QuestionPlacement from "./features/game/QuestionPlacement.jsx";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes.jsx";
 
-function App() {
-  return <QuestionPlacement />;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
 }
-
-export default App;

@@ -10,7 +10,7 @@ __pycache__/
 # Virtual envs
 venv/
 .env/
-.env.example/
+.env.example
 .venv/
 env/
 .env
@@ -52,7 +52,7 @@ ReactApp/.vite/
 # Env files for frontend
 ReactApp/.env
 ReactApp/.env.*
-!.env.example
+.env.example
 
 # Package manager logs
 npm-debug.log*
