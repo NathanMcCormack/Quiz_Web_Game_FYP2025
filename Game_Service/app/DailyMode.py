@@ -207,7 +207,7 @@ def get_today(db: Session = Depends(get_db)):
         questions=public_questions,
     )
 
-router.get("/history", response_model=list[DailyChallengeListEntry])
+@router.get("/history", response_model=list[DailyChallengeListEntry])
 def list_past_challenges(db: Session = Depends(get_db)):
     """
     Returns all past daily challenges that successfully generated questions,
