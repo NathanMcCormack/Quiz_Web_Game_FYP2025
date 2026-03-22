@@ -145,7 +145,7 @@ class DailyCategoryRead(BaseModel):
     is_used: bool
     used_at: Optional[date] = None
 
-    class DailyChallengeListEntry(BaseModel):
+class DailyChallengeListEntry(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     challenge_date: date

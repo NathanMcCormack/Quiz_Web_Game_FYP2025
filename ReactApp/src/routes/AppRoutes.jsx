@@ -2,12 +2,14 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import QuestionPlacement from "../features/game/QuestionPlacement.jsx";
 import DailyModePage from "../features/daily/DailyModePage.jsx";
+import LegacyModePage from "../features/legacy/LegacyModePage.jsx";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<QuestionPlacement />} />
       <Route path="/daily" element={<DailyModePage />} />
+      <Route path="/legacy" element={<LegacyModePage />} />
     </Routes>
   );
 }
