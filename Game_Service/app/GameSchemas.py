@@ -144,3 +144,10 @@ class DailyCategoryRead(BaseModel):
     name: CategoryStr
     is_used: bool
     used_at: Optional[date] = None
+
+    class DailyChallengeListEntry(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    challenge_date: date
+    category: CategoryStr
+    difficulty: Difficulty
