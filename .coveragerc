@@ -1,0 +1,22 @@
+[run]
+branch = True
+source =
+    Game_Service/app
+omit =
+    Game_Service/app/DailyMode.py
+    Game_Service/app/QuestionGenerator.py
+    Game_Service/app/__init__.py
+
+[report]
+show_missing = True
+skip_covered = False
+precision = 2
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+
+[html]
+directory = htmlcov/game_service
+
+[lcov]
+output = coverage/game_service.lcov

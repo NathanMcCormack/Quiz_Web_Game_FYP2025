@@ -1,29 +1,17 @@
-.topbar {
-  background: #1B1F2A;              /* different colour */
-  border-bottom: 1px solid rgba(255,255,255,0.10);  /* thin separating line */
-  top: 0;
-}
-
-.topbar__inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding-top: 12px;
-  height: 88px;
+.topbar__nav {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 24px;
 }
 
-.topbar__title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #F2EEE4;
-  letter-spacing: 0.2px;
+.topbar__link {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+  opacity: 0.7;
 }
 
-.topbar-logo {
-  height: 320px;       
-  width: auto;
-  display: block;
+.topbar__link--active {
+  opacity: 1;
+  font-weight: 700;
+  border-bottom: 2px solid currentColor;
 }
