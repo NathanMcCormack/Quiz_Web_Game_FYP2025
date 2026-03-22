@@ -13,6 +13,7 @@ from .GameSchemas import (
     DailyValidatePlacementResponse,
     DailyCategoryRead,
     DailyCategoryCreate,
+    DailyChallengeListEntry,
 )
 from .QuestionGenerator import generate_questions
 import os
@@ -206,6 +207,51 @@ def get_today(db: Session = Depends(get_db)):
         questions=public_questions,
     )
 
+@router.get("/history", response_model=list[DailyChallengeListEntry])
+def list_past_challenges(db: Session = Depends(get_db)):
+    """
+    Returns all past daily challenges that successfully generated questions,
+    ordered most recent first. Excludes today.
+    """
+    today = get_utc_today()
+    challenges = db.execute(
+        select(DailyChallengeDB)
+        .where(DailyChallengeDB.status == "success")
+        .where(DailyChallengeDB.challenge_date < today)
+        .order_by(DailyChallengeDB.challenge_date.desc())
+    ).scalars().all()
+    return challenges
+
+
+@router.get("/history/{challenge_date}", response_model=DailyChallengePublic)
+def get_past_challenge(challenge_date: date, db: Session = Depends(get_db)):
+    """
+    Returns a specific past challenge by date including its questions (no answers).
+    Returns 404 if the date has no successful challenge.
+    """
+    challenge = db.execute(
+        select(DailyChallengeDB)
+        .where(DailyChallengeDB.challenge_date == challenge_date)
+        .where(DailyChallengeDB.status == "success")
+    ).scalars().first()
+
+    if not challenge:
+        raise HTTPException(status_code=404, detail="No challenge found for this date")
+
+    questions = db.execute(
+        select(DailyQuestionDB)
+        .where(DailyQuestionDB.daily_challenge_id == challenge.id)
+        .order_by(DailyQuestionDB.id)
+    ).scalars().all()
+
+    public_questions = [DailyQuestionPublic.model_validate(q) for q in questions]
+
+    return DailyChallengePublic(
+        challenge_date=challenge.challenge_date,
+        category=challenge.category,
+        difficulty=challenge.difficulty,
+        questions=public_questions,
+    )
 
 @router.post("/validate-placement", response_model=DailyValidatePlacementResponse)
 def validate_daily(payload: DailyValidatePlacementRequest, db: Session = Depends(get_db)):

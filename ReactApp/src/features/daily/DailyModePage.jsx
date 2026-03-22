@@ -65,8 +65,6 @@ export default function DailyModePage() {
 
     setIsLoadingDaily(true);
     try {
-      //ensure today's daily exists
-      await generateTodayDaily();
 
       //fetch today's stored challenge
       const data = await fetchTodayDaily();
