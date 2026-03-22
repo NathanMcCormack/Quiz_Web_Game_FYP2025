@@ -9,3 +9,14 @@ runGame:
 	python -m uvicorn $(GameAPP) --host 0.0.0.0 --port 8001 --reload 
 test: 
 	python -m pytest -vv -x -l --full-trace
+
+test-game:
+	python -m pytest Game_Service/tests -vv
+
+coverage-game:
+	python -m pytest Game_Service/tests \
+		--cov=Game_Service/app \
+		--cov-config=.coveragerc \
+		--cov-report=term-missing \
+		--cov-report=html:htmlcov/game_service \
+		--cov-report=lcov:coverage/game_service.lcov

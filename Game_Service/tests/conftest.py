@@ -52,6 +52,15 @@ def reset_db():
 
 
 @pytest.fixture
+def db_session():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@pytest.fixture
 def client():
     # Force both modules to use the same test session factory
     game_main.SessionLocal = TestingSessionLocal
@@ -65,3 +74,48 @@ def client():
         yield c
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def create_question(client):
+    def _create_question(
+        *,
+        question: str,
+        answer: int,
+        category: str = "General Knowledge",
+        difficulty: str = "easy",
+    ):
+        payload = {
+            "question": question,
+            "answer": answer,
+            "category": category,
+            "difficulty": difficulty,
+        }
+        response = client.post("/api/questions", json=payload)
+        assert response.status_code == 201, response.text
+        return response.json()
+
+    return _create_question
+
+
+@pytest.fixture
+def add_run(client):
+    def _add_run(
+        *,
+        user_id: int,
+        score: int,
+        streak: int,
+        total_questions: int | None = None,
+        category: str | None = None,
+    ):
+        payload = {
+            "score": score,
+            "streak": streak,
+            "total_questions": total_questions,
+            "category": category,
+        }
+        response = client.post(f"/api/users/{user_id}/runs", json=payload)
+        assert response.status_code == 201, response.text
+        return response.json()
+
+    return _add_run

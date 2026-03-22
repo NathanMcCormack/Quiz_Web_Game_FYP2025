@@ -1,0 +1,42 @@
+name: Game Service Coverage
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  game-service-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Game_Service tests with HTML and LCOV coverage
+        run: make coverage-game
+
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-service-htmlcov
+          path: htmlcov/game_service
+          retention-days: 14
+
+      - name: Upload LCOV report
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-service-lcov
+          path: coverage/game_service.lcov
+          retention-days: 14
