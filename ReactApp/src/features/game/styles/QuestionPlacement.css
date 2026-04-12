@@ -100,9 +100,11 @@ div {
 
 .page-center {
   display: flex;
-  justify-content: center;       /* center left/right */
+  justify-content: center;
   align-items: center;
-  min-height: 80vh;              /* places the div in the center of the page */
+  min-height: calc(100vh - 144px);
+  padding: 104px 16px 104px;
+  box-sizing: border-box;
 }
 
 /* Don't vertically-center the HUD area */
