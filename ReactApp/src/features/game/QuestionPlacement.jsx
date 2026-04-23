@@ -1,22 +1,29 @@
-import React, {useState } from "react"; //useState lets the component store values and update them
-import { startGame, validatePlacement } from "./services/gameApi"; //importing the two functions for fetching questions 
+import React, { useState } from "react"; //useState lets the component store values and update them
+import { startGame, validatePlacement } from "./services/gameApi"; //importing the two functions for fetching questions
 import "./styles/QuestionPlacement.css";
 import GameOverPopUp from "./components/GameOverPopUp";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
-//imports from dnd website 
-import { DndContext, closestCenter } from "@dnd-kit/core";
+//imports from dnd website
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  pointerWithin,
+  rectIntersection,
+} from "@dnd-kit/core";
 import TopBar from "../../components/layout/TopBar";
 import FooterBar from "../../components/layout/FooterBar";
 
 import CurrentQuestionCard from "./components/CurrentQuestionCard";
 import LineQuestions from "./components/LineQuestions";
 
-
 function QuestionPlacement() {
   // The question currently being placed
   const [currentQuestion, setCurrentQuestion] = useState(null); //setting usestate to NULL, to start off with currentQuestion
   const [lineQuestions, setLineQuestions] = useState([]);
-  const [score, setScore] = useState(0);   //players score
+  const [score, setScore] = useState(0); //players score
   const [message, setMessage] = useState(""); //used for feedback errors
   const [isValidating, setIsValidating] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -26,8 +33,31 @@ function QuestionPlacement() {
   const [deck, setDeck] = useState([]); // remaining questions
   const [sessionId, setSessionId] = useState(null);
 
-const [endTitle, setEndTitle] = useState("Game Over!");
-const [endSubtitle, setEndSubtitle] = useState("Try Again!");
+  const [endTitle, setEndTitle] = useState("Game Over!");
+  const [endSubtitle, setEndSubtitle] = useState("Try Again!");
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        distance: 12,
+      },
+    })
+  );
+
+  const collisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args);
+
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+
+    return rectIntersection(args);
+  };
 
   const startNewGame = async () => {
     setIsGameOver(false);
@@ -46,13 +76,13 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
   const loadNextFromDeck = (nextDeck) => {
     //If no questions left: player wins and game over popup shown
     if (!nextDeck || nextDeck.length === 0) {
-        setEndTitle("You Win!");
-        setEndSubtitle("Congradulations, You placed all questions correctly");
-        setLastScore(score);
-        resetGame();
-        setIsGameOver(true);
-        setCurrentQuestion(null);
-        return;
+      setEndTitle("You Win!");
+      setEndSubtitle("Congradulations, You placed all questions correctly");
+      setLastScore(score);
+      resetGame();
+      setIsGameOver(true);
+      setCurrentQuestion(null);
+      return;
     }
 
     const [next, ...rest] = nextDeck;
@@ -62,13 +92,15 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
 
   //Validate placement in the deck and if correct, add to number line. if not - game over
   const handleDragEnd = async (event) => {
+    if (isValidating) return;
+
     setMessage("");
 
     //over = droppable id that item is dropped on
     //active = draggable item being moved
     const { over, active } = event;
 
-    if (!over || !currentQuestion) return; 
+    if (!over || !currentQuestion) return;
     if (active?.id !== "current-card") return; //only one draggable at a time - the current card
 
     //Extract the index from "slot-#" id
@@ -78,9 +110,10 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
     const insertIndex = parseInt(slotId.replace("slot-", ""), 10);
     if (Number.isNaN(insertIndex)) return;
 
-    //Find left and right neighbor question IDs for validation endpoint 
+    //Find left and right neighbor question IDs for validation endpoint
     const left = insertIndex - 1 >= 0 ? lineQuestions[insertIndex - 1] : null;
-    const right = insertIndex < lineQuestions.length ? lineQuestions[insertIndex] : null;
+    const right =
+      insertIndex < lineQuestions.length ? lineQuestions[insertIndex] : null;
 
     //If null use null else use that questions id
     const leftNeighborId = left ? left.questionId : null;
@@ -173,12 +206,23 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
     }
   };
 
-
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-    <GameOverPopUp open={isGameOver} score={lastScore} onStartNewGame={startNewGame} title={endTitle} subtitle={endSubtitle} />
-      <TopBar /> 
-      <div className="page-center"> {/* Centering wrapper */}
+    <DndContext
+      sensors={sensors}
+      collisionDetection={collisionDetection}
+      onDragEnd={handleDragEnd}
+    >
+      <GameOverPopUp
+        open={isGameOver}
+        score={lastScore}
+        onStartNewGame={startNewGame}
+        title={endTitle}
+        subtitle={endSubtitle}
+      />
+      <TopBar />
+      <div className="page-center">
+        {" "}
+        {/* Centering wrapper */}
         <div className="qp-card">
           <div className="setup-panel">
             <h2>Start a new game</h2>
@@ -192,7 +236,11 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
                   value={categoryInput}
                   onChange={(e) => setCategoryInput(e.target.value)}
                   placeholder="eg Premier League, 90s Music..."
-                  disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
+                  disabled={
+                    isValidating ||
+                    currentQuestion !== null ||
+                    lineQuestions.length > 0
+                  }
                 />
               </div>
 
@@ -202,7 +250,11 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
                   className="setup-select"
                   value={difficultyInput}
                   onChange={(e) => setDifficultyInput(e.target.value)}
-                  disabled={isValidating || currentQuestion !== null || lineQuestions.length > 0}
+                  disabled={
+                    isValidating ||
+                    currentQuestion !== null ||
+                    lineQuestions.length > 0
+                  }
                 >
                   <option value="easy">Easy</option>
                   <option value="medium">Medium</option>
@@ -210,7 +262,11 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
                 </select>
               </div>
 
-              <button onClick={handleStartGame} disabled={isValidating}>
+              <button
+                className="setup-button"
+                onClick={handleStartGame}
+                disabled={isValidating}
+              >
                 Start Game
               </button>
             </div>
@@ -223,17 +279,21 @@ const [endSubtitle, setEndSubtitle] = useState("Try Again!");
               </p>
             )}
           </div>
-        <div className="number-line">
-          <CurrentQuestionCard question={currentQuestion} isDisabled={isValidating} />
-          <strong>Score:</strong> {score}
-        </div>
-        <div className="number-line">
-          <div className="number-box boundary-box">0</div>
-          <LineQuestions lineQuestions={lineQuestions} /> {/* Left boundary: 0 */}
-          <div className="number-box boundary-box">
-            <FaInfinity />
+          <div className="number-line">
+            <CurrentQuestionCard
+              question={currentQuestion}
+              isDisabled={isValidating}
+            />
+            <strong>Score:</strong> {score}
           </div>
-        </div>
+          <div className="number-line">
+            <div className="number-box boundary-box">0</div>
+            <LineQuestions lineQuestions={lineQuestions} />{" "}
+            {/* Left boundary: 0 */}
+            <div className="number-box boundary-box">
+              <FaInfinity />
+            </div>
+          </div>
         </div>
       </div>
       <FooterBar />

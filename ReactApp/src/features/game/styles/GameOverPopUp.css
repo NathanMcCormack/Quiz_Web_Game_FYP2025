@@ -6,17 +6,19 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  color: #F2EEE4;
 }
 
 .gp-modal {
   width: min(420px, 92vw);
-  background: rgb(69, 137, 158);
+  background: #1B1F2A;
   border-width: 14px;
   border-radius: 14px;
   border-color: black;
   padding: 22px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
   text-align: center;
+  color: #F2EEE4;
 }
 
 .gp-title {
@@ -28,7 +30,8 @@
 }
 
 .gp-button {
-  background-color: rgb(39, 219, 93);
+  color: #1B1F2A;
+  background-color: #F2EEE4;
   padding: 10px 14px;
   border: 0;
   border-radius: 10px;

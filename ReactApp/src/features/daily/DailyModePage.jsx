@@ -9,7 +9,15 @@ import CurrentQuestionCard from "../game/components/CurrentQuestionCard";
 import LineQuestions from "../game/components/LineQuestions";
 import { FaInfinity } from "react-icons/fa6";
 
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  pointerWithin,
+  rectIntersection,
+} from "@dnd-kit/core";
 import {
   generateTodayDaily,
   fetchTodayDaily,
@@ -29,6 +37,29 @@ export default function DailyModePage() {
   const [lastScore, setLastScore] = useState(0);
   const [endTitle, setEndTitle] = useState("Game Over!");
   const [endSubtitle, setEndSubtitle] = useState("Try Again!");
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        distance: 12,
+      },
+    })
+  );
+
+  const collisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args);
+
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+
+    return rectIntersection(args);
+  };
 
   const resetGame = () => {
     setLineQuestions([]);
@@ -65,7 +96,6 @@ export default function DailyModePage() {
 
     setIsLoadingDaily(true);
     try {
-
       //fetch today's stored challenge
       const data = await fetchTodayDaily();
 
@@ -141,7 +171,8 @@ export default function DailyModePage() {
 
     //identify neighbors based on where the user dropped the card
     const left = insertIndex - 1 >= 0 ? lineQuestions[insertIndex - 1] : null;
-    const right = insertIndex < lineQuestions.length ? lineQuestions[insertIndex] : null;
+    const right =
+      insertIndex < lineQuestions.length ? lineQuestions[insertIndex] : null;
 
     const leftNeighborId = left ? left.questionId : null;
     const rightNeighborId = right ? right.questionId : null;
@@ -200,34 +231,74 @@ export default function DailyModePage() {
   };
 
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <GameOverPopUp open={isGameOver} score={lastScore} onStartNewGame={startNewGame} title={endTitle} subtitle={endSubtitle}/>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={collisionDetection}
+      onDragEnd={handleDragEnd}
+    >
+      <GameOverPopUp
+        open={isGameOver}
+        score={lastScore}
+        onStartNewGame={startNewGame}
+        title={endTitle}
+        subtitle={endSubtitle}
+      />
       <TopBar />
       <div className="page-center">
         <div className="qp-card">
           <div className="setup-panel">
             <h2>Daily Mode</h2>
             {meta && (
-              <p>
-                <strong>Date:</strong> {meta.date}
-                <strong>Category:</strong> {meta.category}
-                <strong>Difficulty:</strong> {meta.difficulty}
-              </p>
+              <div className="daily-meta" aria-label="Daily challenge details">
+                <div className="daily-meta-card">
+                  <div className="daily-meta-label">Date</div>
+                  <div className="daily-meta-value">
+                    {new Date(`${meta.date}T00:00:00`).toLocaleDateString(
+                      "en-IE",
+                      {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      }
+                    )}
+                  </div>
+                </div>
+
+                <div className="daily-meta-card">
+                  <div className="daily-meta-label">Category</div>
+                  <div className="daily-meta-value">{meta.category}</div>
+                </div>
+
+                <div className="daily-meta-card">
+                  <div className="daily-meta-label">Difficulty</div>
+                  <div className="daily-meta-value daily-meta-value--caps">
+                    {meta.difficulty}
+                  </div>
+                </div>
+              </div>
             )}
 
-            <button onClick={startDaily} disabled={isValidating || isLoadingDaily}>
+            <button
+              className="setup-button"
+              onClick={startDaily}
+              disabled={isValidating || isLoadingDaily}
+            >
               {isLoadingDaily ? "Loading..." : "Reload Daily"}
             </button>
 
             {message && (
-              <p>
+              <p className="setup-message">
                 <strong>Message:</strong> {message}
               </p>
             )}
           </div>
 
           <div className="number-line">
-            <CurrentQuestionCard question={currentQuestion} isDisabled={isValidating || isLoadingDaily} />
+            <CurrentQuestionCard
+              question={currentQuestion}
+              isDisabled={isValidating || isLoadingDaily}
+            />
             <strong>Score:</strong> {score}
           </div>
 

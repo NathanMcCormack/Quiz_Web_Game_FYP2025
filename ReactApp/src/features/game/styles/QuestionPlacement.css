@@ -100,7 +100,7 @@ div {
 
 .page-center {
   display: flex;
-  justify-content: center;
+  justify-content: center;       /* center left/right */
   align-items: center;
   min-height: calc(100vh - 144px);
   padding: 104px 16px 104px;
@@ -287,6 +287,54 @@ div {
   box-shadow: none;
 }
 
+.setup-message {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(60, 50, 35, 0.14);
+  background: rgba(43, 108, 176, 0.08);
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.daily-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0 16px;
+}
+
+.daily-meta-card {
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(60, 50, 35, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 241, 232, 0.92));
+  box-shadow: 0 6px 16px rgba(30, 24, 16, 0.06);
+}
+
+.daily-meta-label {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.56);
+}
+
+.daily-meta-value {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.daily-meta-value--caps {
+  text-transform: capitalize;
+}
+
 
 /* =========================================================
    CURRENT QUESTION CARD / DROP ZONE
@@ -305,6 +353,10 @@ div {
   font-weight: 600;
 
   box-shadow: 0 6px 16px rgba(30, 24, 16, 0.08);
+
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .current-question-text {
@@ -397,6 +449,17 @@ div {
   background-color: rgba(47, 133, 90, 0.10);
 }
 
+
+
+@media (max-width: 760px) {
+  .daily-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-meta-card {
+    text-align: center;
+  }
+}
 
 /* =========================================================
    RESPONSIVE (Laptop heights etc.)
