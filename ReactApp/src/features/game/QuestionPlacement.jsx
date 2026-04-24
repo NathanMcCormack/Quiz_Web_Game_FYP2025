@@ -4,15 +4,7 @@ import "./styles/QuestionPlacement.css";
 import GameOverPopUp from "./components/GameOverPopUp";
 import { FaInfinity } from "react-icons/fa6"; //Infintity Logo from React-Icons website
 //imports from dnd website
-import {
-  DndContext,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  pointerWithin,
-  rectIntersection,
-} from "@dnd-kit/core";
+import {DndContext,MouseSensor,TouchSensor,useSensor,useSensors,pointerWithin,rectIntersection,} from "@dnd-kit/core";
 import TopBar from "../../components/layout/TopBar";
 import FooterBar from "../../components/layout/FooterBar";
 
@@ -22,24 +14,26 @@ import LineQuestions from "./components/LineQuestions";
 function QuestionPlacement() {
   // The question currently being placed
   const [currentQuestion, setCurrentQuestion] = useState(null); //setting usestate to NULL, to start off with currentQuestion
-  const [lineQuestions, setLineQuestions] = useState([]);
+  const [lineQuestions, setLineQuestions] = useState([]); //stores cards on the number line
   const [score, setScore] = useState(0); //players score
   const [message, setMessage] = useState(""); //used for feedback errors
-  const [isValidating, setIsValidating] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
+  const [isValidating, setIsValidating] = useState(false); //tracks if backend is still loading validation
+  const [isGameOver, setIsGameOver] = useState(false); //shows/hides game over popup
   const [lastScore, setLastScore] = useState(0);
   const [categoryInput, setCategoryInput] = useState("");
-  const [difficultyInput, setDifficultyInput] = useState("easy");
+  const [difficultyInput, setDifficultyInput] = useState("easy"); //defaults to easy
   const [deck, setDeck] = useState([]); // remaining questions
   const [sessionId, setSessionId] = useState(null);
 
   const [endTitle, setEndTitle] = useState("Game Over!");
   const [endSubtitle, setEndSubtitle] = useState("Try Again!");
 
+  //imported from dnd kit to allow drag and drop on laptops or phones
+  //tells dnd kit to use the mouse as one way to drag teh current question
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 8, //mouse must move at least 8 pixels before game starts
       },
     }),
     useSensor(TouchSensor, {
@@ -49,14 +43,15 @@ function QuestionPlacement() {
     })
   );
 
+  //checks wjether mouse pointer position is inside a droppable slot
   const collisionDetection = (args) => {
     const pointerCollisions = pointerWithin(args);
 
-    if (pointerCollisions.length > 0) {
-      return pointerCollisions;
+    if (pointerCollisions.length > 0) { //if array length is greater than 0, the pointer is inside a droppable slot
+      return pointerCollisions; //returns drop target found by pointerWithin
     }
 
-    return rectIntersection(args);
+    return rectIntersection(args); //This checks whether the crad and drop zones areas overlap, more forgiving for user
   };
 
   const startNewGame = async () => {
@@ -67,6 +62,7 @@ function QuestionPlacement() {
     setMessage("");
   };
 
+  //seperate function if user wants to resest the game (retry)
   const resetGame = () => {
     setLineQuestions([]);
     setScore(0);
@@ -75,6 +71,7 @@ function QuestionPlacement() {
 
   const loadNextFromDeck = (nextDeck) => {
     //If no questions left: player wins and game over popup shown
+    //nextDeck is an array of any leftover questions
     if (!nextDeck || nextDeck.length === 0) {
       setEndTitle("You Win!");
       setEndSubtitle("Congradulations, You placed all questions correctly");
@@ -85,45 +82,47 @@ function QuestionPlacement() {
       return;
     }
 
+    //takes current question and stores it in next, takes all other questions and puts it in rest -> nextDeck = [next, rest1, rest2 ...]
     const [next, ...rest] = nextDeck;
     setCurrentQuestion(next);
     setDeck(rest);
   };
 
-  //Validate placement in the deck and if correct, add to number line. if not - game over
+  //when player drops card, calls backend
   const handleDragEnd = async (event) => {
     if (isValidating) return;
 
-    setMessage("");
+    setMessage(""); //clears old messages
 
-    //over = droppable id that item is dropped on
-    //active = draggable item being moved
+    //over is the drop zone
+    //active is the card being being dragged 
     const { over, active } = event;
 
-    if (!over || !currentQuestion) return;
-    if (active?.id !== "current-card") return; //only one draggable at a time - the current card
+    if (!over || !currentQuestion) return; //if not over dropzone or no card being dragged
 
-    //Extract the index from "slot-#" id
+    if (active?.id !== "current-card") return; //checks that dragged item is the current card
+
+    //coverts dropped slot ID into a string
     const slotId = over.id.toString();
     if (!slotId.startsWith("slot-")) return;
 
-    const insertIndex = parseInt(slotId.replace("slot-", ""), 10);
-    if (Number.isNaN(insertIndex)) return;
+    const insertIndex = parseInt(slotId.replace("slot-", ""), 10); //extracts number from slot ID eg. slot-3 -> 3
+    if (Number.isNaN(insertIndex)) return; //ensure id is a number , not "test"
 
     //Find left and right neighbor question IDs for validation endpoint
     const left = insertIndex - 1 >= 0 ? lineQuestions[insertIndex - 1] : null;
-    const right =
-      insertIndex < lineQuestions.length ? lineQuestions[insertIndex] : null;
+    const right = insertIndex < lineQuestions.length ? lineQuestions[insertIndex] : null;
 
     //If null use null else use that questions id
     const leftNeighborId = left ? left.questionId : null;
     const rightNeighborId = right ? right.questionId : null;
-
+    //send request to backend for validation
     setIsValidating(true);
     try {
+      //sends neighbour ids 
       const result = await validatePlacement({
         placedQuestionId: currentQuestion.id,
-        leftNeighborId,
+        leftNeighborId, 
         rightNeighborId,
       });
 
@@ -134,26 +133,12 @@ function QuestionPlacement() {
           questionId: currentQuestion.id,
           question: currentQuestion,
         };
-
-        const newLine = [...lineQuestions];
-        newLine.splice(insertIndex, 0, newCard);
-
+        const newLine = [...lineQuestions]; //creates a new array to avoid driectly mutating a state
+        newLine.splice(insertIndex, 0, newCard); //inserts new card - start at insertIndex, delete 0 items, insert newCard
         setLineQuestions(newLine);
         setScore((prev) => prev + 1);
         setCurrentQuestion(null);
-
-        //If 20 questions placed, win
-        const placedCount = newLine.length;
-        if (placedCount >= 20) {
-          setEndTitle("You Win!");
-          setEndSubtitle("You placed all questions correctly 🎉");
-          setLastScore(score + 1);
-          resetGame();
-          setIsGameOver(true);
-          return;
-        }
-
-        loadNextFromDeck(deck);
+        loadNextFromDeck(deck); //if player has not won yet, loads next question
         return;
       }
 
@@ -162,7 +147,9 @@ function QuestionPlacement() {
       resetGame();
       setIsGameOver(true);
       setCurrentQuestion(null);
-    } catch (err) {
+    } 
+    
+    catch (err) {
       console.error(err);
       setMessage("Validation failed due to a server error. Try again.");
     } finally {
@@ -174,7 +161,7 @@ function QuestionPlacement() {
   const handleStartGame = async () => {
     setMessage("");
 
-    if (!categoryInput.trim()) {
+    if (!categoryInput.trim()) { //checks if category input is empty 
       setMessage("Please enter a category.");
       return;
     }
@@ -184,21 +171,22 @@ function QuestionPlacement() {
     setCurrentQuestion(null);
 
     try {
-      const data = await startGame({
+      const data = await startGame({ //calls backend and sends category and difficulty
         category: categoryInput.trim(),
         difficulty: difficultyInput,
       });
 
-      setSessionId(data.session_id);
+      setSessionId(data.session_id); //stores backend sesssiom
 
       //Shuffle questions client-side
-      const qs = [...data.questions];
-      for (let i = qs.length - 1; i > 0; i--) {
+      const qs = [...data.questions]; //creates copy of questions array
+      //Fisher Yates shuffle Loop
+      for (let i = qs.length - 1; i > 0; i--) { 
         const j = Math.floor(Math.random() * (i + 1));
         [qs[i], qs[j]] = [qs[j], qs[i]];
       }
 
-      setDeck(qs.slice(1));
+      setDeck(qs.slice(1)); //stores all questions except for first in the deck
       setCurrentQuestion(qs[0]);
     } catch (err) {
       console.error(err);
@@ -207,18 +195,8 @@ function QuestionPlacement() {
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={collisionDetection}
-      onDragEnd={handleDragEnd}
-    >
-      <GameOverPopUp
-        open={isGameOver}
-        score={lastScore}
-        onStartNewGame={startNewGame}
-        title={endTitle}
-        subtitle={endSubtitle}
-      />
+    <DndContext sensors={sensors} collisionDetection={collisionDetection} onDragEnd={handleDragEnd}> {/* passes DnD Logic */}
+      <GameOverPopUp open={isGameOver} score={lastScore} onStartNewGame={startNewGame} title={endTitle} subtitle={endSubtitle} />
       <TopBar />
       <div className="page-center">
         {" "}
@@ -234,9 +212,9 @@ function QuestionPlacement() {
                   className="setup-input"
                   type="text"
                   value={categoryInput}
-                  onChange={(e) => setCategoryInput(e.target.value)}
+                  onChange={(e) => setCategoryInput(e.target.value)} //runs every tim ethe user canges it, current text in input, updates catgeory input
                   placeholder="eg Premier League, 90s Music..."
-                  disabled={
+                  disabled={ //disables input if there is - an active card, questions already in the number line, or is validating 
                     isValidating ||
                     currentQuestion !== null ||
                     lineQuestions.length > 0
@@ -262,7 +240,7 @@ function QuestionPlacement() {
                 </select>
               </div>
 
-              <button
+              <button //start game button
                 className="setup-button"
                 onClick={handleStartGame}
                 disabled={isValidating}
@@ -271,16 +249,16 @@ function QuestionPlacement() {
               </button>
             </div>
 
-            {sessionId && <p>Session: {sessionId}</p>}
+            {sessionId && <p>Session: {sessionId}</p>} {/* if session ID exists - show it */}
 
-            {message && (
+            {message && ( //checks for error message
               <p>
                 <strong>Message:</strong> {message}
               </p>
             )}
           </div>
           <div className="number-line">
-            <CurrentQuestionCard
+            <CurrentQuestionCard //renders current question
               question={currentQuestion}
               isDisabled={isValidating}
             />
@@ -291,6 +269,7 @@ function QuestionPlacement() {
             <LineQuestions lineQuestions={lineQuestions} />{" "}
             {/* Left boundary: 0 */}
             <div className="number-box boundary-box">
+              {/* right boundry box: infinity */}
               <FaInfinity />
             </div>
           </div>
