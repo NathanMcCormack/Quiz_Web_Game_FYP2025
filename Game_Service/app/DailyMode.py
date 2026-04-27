@@ -103,19 +103,10 @@ def pick_unused_category(db: Session) -> str:
 # -------- Daily Mode Endpoints --------
 
 @router.post("/generate-today")
-def generate_today(
-    db: Session = Depends(get_db),
-    _auth: None = Depends(verify_daily_job_token),
-):
-    """
-    Creates today's daily challenge once, using the UTC date.
-    If it already exists and succeeded, return a non-error response.
-    """
+def generate_today(db: Session = Depends(get_db), _auth: None = Depends(verify_daily_job_token),):
     today = get_utc_today()
 
-    existing = db.execute(
-        select(DailyChallengeDB).where(DailyChallengeDB.challenge_date == today)
-    ).scalars().first()
+    existing = db.execute(select(DailyChallengeDB).where(DailyChallengeDB.challenge_date == today)).scalars().first() #.scalars allows empty reseults to be returned
 
     if existing:
         if existing.status == "success":

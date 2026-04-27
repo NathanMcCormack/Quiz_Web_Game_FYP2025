@@ -99,7 +99,6 @@ function QuestionPlacement() {
     const { over, active } = event;
 
     if (!over || !currentQuestion) return; //if not over dropzone or no card being dragged
-
     if (active?.id !== "current-card") return; //checks that dragged item is the current card
 
     //coverts dropped slot ID into a string
@@ -180,6 +179,7 @@ function QuestionPlacement() {
 
       //Shuffle questions client-side
       const qs = [...data.questions]; //creates copy of questions array
+      
       //Fisher Yates shuffle Loop
       for (let i = qs.length - 1; i > 0; i--) { 
         const j = Math.floor(Math.random() * (i + 1));

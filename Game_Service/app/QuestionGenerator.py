@@ -12,12 +12,12 @@ class GeneratedQuestion(BaseModel):
     category: str = Field(min_length=1, max_length=64)
     difficulty: Difficulty
 
-
+#tells model to expect a list
 class GeneratedQuestionSet(BaseModel):
     questions: list[GeneratedQuestion]
 
 #function for generating the questions
-#* forces keyword-only arguments meaning it must be caled like (category="Math", difficulty = "hard", count=20). It avoids accidental mix-ups 
+#* forces keyword-only arguments meaning it must be caled like (category="Math", difficulty = "hard", count=8). It avoids accidental mix-ups 
 #it tghen returns a list of generated questions 
 def generate_questions(*, category: str, difficulty: Difficulty, count: int = 8) -> list[GeneratedQuestion]:
 
@@ -49,6 +49,7 @@ def generate_questions(*, category: str, difficulty: Difficulty, count: int = 8)
         "If you cannot produce enough compliant items, regenerate internally until you can."
     )
 
+    #the user prompt gives the exact category, difficulty and count requirements
     user = (
         f"Category: {category}\n"
         f"Difficulty: {difficulty}\n"
@@ -61,22 +62,24 @@ def generate_questions(*, category: str, difficulty: Difficulty, count: int = 8)
     resp = client.responses.parse(
         model=model,
         input=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
+            {"role": "system", "content": system}, #sends the system prompt
+            {"role": "user", "content": user}, #sends the user prompt
         ],
         #the schema I want it to follow 
         text_format=GeneratedQuestionSet,
         # prevents storing teh request/response for privacy/data retention 
-        store=False,
+        store=False, #tells openAI to not store our data in their databases
     )
 
-    parsed: GeneratedQuestionSet = resp.output_parsed
+    parsed: GeneratedQuestionSet = resp.output_parsed #gets the list of questions
 
     #checks that teh exact amount of questions were generated 
     if len(parsed.questions) != count:
         raise ValueError(f"Expected {count} questions, got {len(parsed.questions)}")
 
-    #used for safety to avoid model confusion, will valuidate the answer, clean up the question and overwrite the category and difficulty to ensure they are exactly what the user inputted
+    #creates empty list called out
+    #will store te final clean questions
+    #shoylud be a list of GeneratedQuestion objects
     out: list[GeneratedQuestion] = []
     for q in parsed.questions:
         out.append(

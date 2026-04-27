@@ -165,7 +165,7 @@ def delete_question(question_id: int, db: Session=Depends(get_db)):
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-#creates new sesion ID, generates 20 questions using OpenAI, saves them to the database under the sessions ID, returns teh sesionID and the saved questions to the frontend 
+#creates new sesion ID, generates 8 questions using OpenAI, saves them to the database under the sessions ID, returns teh sesionID and the saved questions to the frontend 
 @app.post("/api/game/start", response_model=GameStartResponse)
 def start_game(payload: GameStartRequest, db: Session = Depends(get_db)):
     #generates a unique identifier for this game session 
@@ -187,15 +187,15 @@ def start_game(payload: GameStartRequest, db: Session = Depends(get_db)):
     #convert the generated questions into teh DB rows and stage them for inserting 
     db_rows: list[QuestionDB] = []
     for q in generated:
-        row = QuestionDB(
+        row = QuestionDB( #creates new db row object
             question=q.question,
             answer=q.answer,
             category=q.category,
             difficulty=q.difficulty,
             game_session_id=session_id,
         )
-        db.add(row)
-        db_rows.append(row)
+        db.add(row) #adds row but does not save it yet
+        db_rows.append(row) #adds row object to db_rows list
 
     try:
         db.commit()
@@ -203,6 +203,7 @@ def start_game(payload: GameStartRequest, db: Session = Depends(get_db)):
         db.rollback()
         raise
 
+#loops through new rows and reloads from db, avoids auto geerated values like ids
     for row in db_rows:
         db.refresh(row)
 
@@ -211,11 +212,12 @@ def start_game(payload: GameStartRequest, db: Session = Depends(get_db)):
     return GameStartResponse(session_id=session_id, questions=public_questions)
 
 #----------- Gameplay Validation -----------
-@app.post("/api/game/validate-placement", response_model=ValidatePlacementResponse)
-def validate_placement(payload: ValidatePlacementRequest, db: Session=Depends(get_db)):
-    placed = db.get(QuestionDB, payload.placed_question_id)
+@app.post("/api/game/validate-placement", response_model=ValidatePlacementResponse) # reurns shape defined in validatePlacement
+def validate_placement(payload: ValidatePlacementRequest, db: Session=Depends(get_db)): #shema, db
+    placed = db.get(QuestionDB, payload.placed_question_id) #looks for id sent from frontend
     if not placed:
         raise HTTPException(status_code=404, detail="Placed question not found")
+    #default to none in case of no other cards
     left=None
     right=None
     #if there is a crad on the left
@@ -238,11 +240,9 @@ def validate_placement(payload: ValidatePlacementRequest, db: Session=Depends(ge
     if left is None and right is None:
         correct = True
     elif left is None:
-        #error handling for if on right card exists
-        correct = placed_answer <= right_answer  # right_answer is not None here
+        correct = placed_answer <= right_answer  
     elif right is None:
-        #"" for if only left card exsts 
-        correct = left_answer <= placed_answer   # left_answer is not None here
+        correct = left_answer <= placed_answer  
     else:
         #card on both keft and right
         correct = left_answer <= placed_answer <= right_answer
